@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRD.ai - Document Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#001a33",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#2e2040",
+                        "on-tertiary-container": "#00334d",
+                        "on-secondary-fixed": "#1a1030",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#2e1a28",
+                        "background": "#fef7ff",
+                        "tertiary-container": "#40c0ee",
+                        "on-secondary-fixed-variant": "#4a3068",
+                        "on-primary-fixed": "#3d0028",
+                        "on-primary-container": "#2e1a28",
+                        "inverse-surface": "#2e1a28",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#c8eaff",
+                        "primary-fixed": "#ffd6ee",
+                        "tertiary": "#0096cc",
+                        "on-surface-variant": "#604868",
+                        "primary-fixed-dim": "#f0a0cc",
+                        "surface-container-high": "#f2e8f2",
+                        "primary-container": "#f080c0",
+                        "surface-container": "#f8eef8",
+                        "secondary": "#7c52aa",
+                        "surface": "#fef7ff",
+                        "surface-container-highest": "#ece2ec",
+                        "outline-variant": "#dcc8e0",
+                        "error": "#e53e3e",
+                        "surface-bright": "#fef7ff",
+                        "secondary-fixed": "#eedcff",
+                        "secondary-container": "#eedcff",
+                        "on-surface": "#2e1a28",
+                        "primary": "#e040a0",
+                        "on-tertiary-fixed-variant": "#005580",
+                        "error-container": "#ffe8e8",
+                        "surface-variant": "#f2e8f2",
+                        "surface-dim": "#e0d6e0",
+                        "secondary-fixed-dim": "#c8a8e8",
+                        "on-error-container": "#9b1c1c",
+                        "surface-tint": "#e040a0",
+                        "inverse-primary": "#f0a0cc",
+                        "tertiary-fixed-dim": "#80d0f0",
+                        "on-primary-fixed-variant": "#a02070",
+                        "outline": "#907898",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#fbf2fb",
+                        "inverse-on-surface": "#fef7ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["DM Sans", "sans-serif"],
+                        display: ["DM Sans", "sans-serif"],
+                        body: ["DM Sans", "sans-serif"],
+                        label: ["DM Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'DM Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen w-64 rounded-r-lg bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant shadow-xl p-4 gap-2 z-40 relative">
+<div class="flex items-center gap-3 mb-8 px-4">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-xl shadow-[0_4px_16px_rgba(224,64,160,0.2)]">P</div>
+<div>
+<h1 class="text-xl font-black text-primary tracking-tight">PRD.ai</h1>
+<p class="text-xs text-on-surface-variant font-medium">AI Copilot</p>
+</div>
+</div>
+<button class="flex items-center justify-center gap-2 w-full bg-primary text-on-primary rounded-full py-3 mb-6 font-bold shadow-[0_4px_16px_rgba(224,64,160,0.2)] hover:scale-[1.03] active:scale-95 transition-all duration-200 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+            New PRD
+        </button>
+<div class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-transform duration-200 ease-out font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-full px-4 py-3 font-bold hover:scale-[1.03] transition-transform duration-200 ease-out font-body text-label-lg shadow-[0_4px_16px_rgba(240,128,192,0.2)]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+                Documents
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-transform duration-200 ease-out font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">auto_awesome_motion</span>
+                Templates
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-transform duration-200 ease-out font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+                Analytics
+            </a>
+</div>
+<div class="flex flex-col gap-2 mt-auto pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-transform duration-200 ease-out font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-transform duration-200 ease-out font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+<!-- Document Header (Simplified TopAppBar context) -->
+<header class="flex justify-between items-center px-6 py-4 w-full bg-surface shadow-[0_4px_16px_rgba(224,64,160,0.05)] z-30">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="bg-primary-fixed text-on-primary-fixed text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider">Draft</span>
+<h2 class="text-2xl font-bold text-on-surface font-headline">User Authentication V2 PRD</h2>
+</div>
+<p class="text-sm text-on-surface-variant flex items-center gap-2 mt-1">
+                        Last edited 2 mins ago by <span class="font-medium text-secondary">Sarah Connor</span>
+</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest hover:text-primary transition-all duration-200 hover:scale-105">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-full border border-outline font-medium text-on-surface hover:bg-surface-container-highest transition-all duration-200 hover:scale-[1.03]">
+                        Share
+                    </button>
+<button class="px-4 py-2 rounded-full bg-primary text-on-primary font-bold shadow-[0_4px_16px_rgba(224,64,160,0.2)] hover:scale-[1.03] active:scale-95 transition-all duration-200">
+                        Export
+                    </button>
+</div>
+</div>
+</header>
+<!-- Editor Workspace -->
+<div class="flex-1 flex overflow-hidden bg-surface-container-lowest">
+<!-- Main Document Area -->
+<div class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden p-6 md:p-10 relative">
+<!-- Toolbar -->
+<div class="sticky top-0 z-20 bg-surface/90 backdrop-blur-md border border-outline-variant rounded-full px-4 py-2 mb-8 flex items-center justify-between shadow-sm mx-auto w-full max-w-4xl">
+<div class="flex items-center gap-1 border-r border-outline-variant pr-4">
+<select class="bg-transparent border-none text-on-surface font-medium focus:ring-0 cursor-pointer text-sm">
+<option>Heading 1</option>
+<option>Heading 2</option>
+<option>Normal Text</option>
+</select>
+</div>
+<div class="flex items-center gap-1 px-4 border-r border-outline-variant">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors font-bold">B</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors italic font-serif">I</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors underline">U</button>
+</div>
+<div class="flex items-center gap-1 px-4 border-r border-outline-variant">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface hover:bg-secondary-fixed hover:text-on-secondary-fixed transition-colors"><span class="material-symbols-outlined text-sm">format_list_bulleted</span></button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface hover:bg-secondary-fixed hover:text-on-secondary-fixed transition-colors"><span class="material-symbols-outlined text-sm">format_list_numbered</span></button>
+</div>
+<div class="flex items-center pl-4 gap-2">
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-tertiary-container text-on-tertiary-container text-sm font-bold hover:scale-105 transition-transform shadow-[0_2px_8px_rgba(64,192,238,0.2)]">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                            Improve text
+                        </button>
+</div>
+</div>
+<!-- Document Content (Bento-ish layout for structural feel) -->
+<div class="max-w-4xl mx-auto w-full space-y-8 pb-24">
+<!-- Title Block -->
+<div class="space-y-4 mb-12">
+<h1 class="text-4xl md:text-5xl font-black text-on-surface font-headline leading-tight focus:outline-none" contenteditable="true">User Authentication V2</h1>
+<p class="text-xl text-on-surface-variant focus:outline-none" contenteditable="true">Implementing OAuth2.0 and biometric login for enhanced security and smoother onboarding.</p>
+</div>
+<!-- Meta Data Card -->
+<div class="bg-surface rounded-2xl p-6 shadow-[0_8px_24px_rgba(224,64,160,0.08)] border border-primary-fixed/50 flex flex-wrap gap-6">
+<div class="flex flex-col gap-1">
+<span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Status</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full text-sm font-bold inline-block w-max">In Review</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Target Release</span>
+<span class="text-on-surface font-medium text-sm py-1">Q3 2024</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Epic</span>
+<span class="text-primary font-bold text-sm py-1 underline decoration-primary/30 underline-offset-4">Core Security Upgrade</span>
+</div>
+</div>
+<!-- Section: Executive Summary -->
+<div class="space-y-4">
+<h3 class="text-2xl font-bold text-on-surface border-b-2 border-surface-variant pb-2 flex items-center gap-2 group cursor-pointer">
+                            Executive Summary
+                            <span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
+</h3>
+<p class="text-on-surface leading-relaxed text-lg focus:outline-none hover:bg-surface-container/50 p-2 rounded-xl transition-colors" contenteditable="true">
+                            The current authentication flow is seeing a 15% drop-off rate during password creation. V2 aims to reduce friction by introducing social logins (Google, Apple) and biometric support (FaceID/TouchID) on mobile. This will decrease time-to-first-value and improve our security posture by reducing reliance on weak passwords.
+                        </p>
+</div>
+<!-- Section: User Stories (Bento Style) -->
+<div class="space-y-6">
+<h3 class="text-2xl font-bold text-on-surface border-b-2 border-surface-variant pb-2">User Stories</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Story Card 1 -->
+<div class="bg-surface rounded-2xl p-5 shadow-[0_4px_16px_rgba(124,82,170,0.08)] border border-secondary-fixed-dim/30 hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed text-xs font-bold px-2 py-1 rounded-full">US-101</span>
+<button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined text-sm">more_horiz</span></button>
+</div>
+<p class="text-on-surface font-medium mb-3">As a new user, I want to sign up using my Google account so that I don't have to remember another password.</p>
+<div class="flex flex-wrap gap-2">
+<span class="text-xs bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full">Priority: High</span>
+<span class="text-xs bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full">Frontend</span>
+</div>
+</div>
+<!-- Story Card 2 -->
+<div class="bg-surface rounded-2xl p-5 shadow-[0_4px_16px_rgba(124,82,170,0.08)] border border-secondary-fixed-dim/30 hover:-translate-y-1 transition-transform duration-300">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed text-xs font-bold px-2 py-1 rounded-full">US-102</span>
+<button class="text-on-surface-variant hover:text-secondary"><span class="material-symbols-outlined text-sm">more_horiz</span></button>
+</div>
+<p class="text-on-surface font-medium mb-3">As a mobile user, I want to enable FaceID for subsequent logins to access the app faster.</p>
+<div class="flex flex-wrap gap-2">
+<span class="text-xs bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full">Priority: Medium</span>
+<span class="text-xs bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full">Mobile Apps</span>
+</div>
+</div>
+</div>
+<button class="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-outline-variant rounded-xl text-on-surface-variant hover:border-primary hover:text-primary transition-colors font-bold bg-surface-container-lowest hover:bg-primary-fixed/10">
+<span class="material-symbols-outlined">add</span> Add User Story
+                        </button>
+</div>
+<!-- Section: Acceptance Criteria -->
+<div class="space-y-4">
+<div class="flex items-center justify-between border-b-2 border-surface-variant pb-2">
+<h3 class="text-2xl font-bold text-on-surface">Acceptance Criteria</h3>
+<button class="flex items-center gap-1 text-tertiary text-sm font-bold hover:bg-tertiary-fixed px-3 py-1 rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span> Generate AC
+                            </button>
+</div>
+<ul class="space-y-3">
+<li class="flex items-start gap-3 p-3 rounded-xl hover:bg-surface-container-lowest group transition-colors">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center mt-0.5 group-hover:border-primary transition-colors"></div>
+<p class="text-on-surface focus:outline-none flex-1" contenteditable="true">Google OAuth implementation follows official guidelines and requests only email and basic profile scope.</p>
+</li>
+<li class="flex items-start gap-3 p-3 rounded-xl hover:bg-surface-container-lowest group transition-colors">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center mt-0.5 group-hover:border-primary transition-colors"></div>
+<p class="text-on-surface focus:outline-none flex-1" contenteditable="true">Fallback to standard email/password exists if biometric authentication fails 3 times.</p>
+</li>
+<li class="flex items-start gap-3 p-3 rounded-xl hover:bg-surface-container-lowest group transition-colors">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center mt-0.5 group-hover:border-primary transition-colors"></div>
+<p class="text-on-surface focus:outline-none flex-1" contenteditable="true">Existing users can link their social accounts in the Settings &gt; Security tab.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- AI Copilot Panel (Right Sidebar) -->
+<aside class="w-80 bg-surface border-l border-outline-variant flex flex-col shadow-[-8px_0_24px_rgba(224,64,160,0.05)] z-30 transform transition-transform duration-300 hidden lg:flex">
+<!-- Panel Header -->
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-primary-fixed/20">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-[0_2px_8px_rgba(224,64,160,0.3)]">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<h3 class="font-bold text-on-surface font-headline">AI Copilot</h3>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">close_fullscreen</span>
+</button>
+</div>
+<!-- Chat History Area -->
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+<!-- AI Suggestion Bubble -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl rounded-tl-sm p-4 shadow-sm relative">
+<p class="text-sm text-on-surface mb-3">I noticed your 'Acceptance Criteria' might be missing error handling states. Would you like me to draft some criteria for network failures during social login?</p>
+<div class="flex gap-2">
+<button class="bg-primary text-on-primary text-xs font-bold px-3 py-1.5 rounded-full hover:scale-105 transition-transform shadow-[0_2px_8px_rgba(224,64,160,0.2)]">Yes, generate</button>
+<button class="bg-surface-variant text-on-surface-variant text-xs font-bold px-3 py-1.5 rounded-full hover:bg-surface-container-highest transition-colors">Dismiss</button>
+</div>
+</div>
+<!-- User Message Bubble -->
+<div class="bg-secondary-fixed text-on-secondary-fixed rounded-2xl rounded-tr-sm p-4 shadow-sm self-end max-w-[85%]">
+<p class="text-sm">Can you rewrite the Executive Summary to sound more urgent for the stakeholders?</p>
+</div>
+<!-- AI Processing/Response -->
+<div class="bg-primary-container text-on-primary-container rounded-2xl rounded-tl-sm p-4 shadow-sm">
+<p class="text-sm mb-3">Here is a more urgent draft:</p>
+<div class="bg-surface/50 p-3 rounded-xl border border-primary-fixed-dim/30 text-sm mb-3 italic">
+                            "With password-related drop-offs costing us an estimated 15% in daily conversions, upgrading our authentication flow is critical. V2 implements immediate friction-reducers (Social Login, Biometrics) to stem this leak and accelerate user onboarding..."
+                        </div>
+<button class="flex items-center justify-center gap-1 w-full bg-surface text-primary text-xs font-bold px-3 py-2 rounded-full hover:bg-surface-bright transition-colors border border-primary/20">
+<span class="material-symbols-outlined text-sm">content_copy</span> Apply to Document
+                        </button>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-4 bg-surface-container-lowest border-t border-outline-variant">
+<div class="relative">
+<textarea class="w-full bg-surface-container rounded-xl border-none focus:ring-2 focus:ring-primary text-sm p-3 pr-10 resize-none text-on-surface placeholder-on-surface-variant/50" placeholder="Ask AI to write, edit, or brainstorm..." rows="2"></textarea>
+<button class="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-[0_2px_8px_rgba(224,64,160,0.3)] hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-sm">arrow_upward</span>
+</button>
+</div>
+<div class="flex gap-2 mt-2 overflow-x-auto pb-1 hide-scrollbar">
+<span class="whitespace-nowrap text-[10px] uppercase font-bold text-tertiary bg-tertiary-fixed px-2 py-1 rounded-full cursor-pointer hover:bg-tertiary-fixed-dim">Summarize</span>
+<span class="whitespace-nowrap text-[10px] uppercase font-bold text-secondary bg-secondary-fixed px-2 py-1 rounded-full cursor-pointer hover:bg-secondary-fixed-dim">Find Risks</span>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Floating Action Button for Mobile AI Chat (Visible only on smaller screens) -->
+<button class="lg:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary text-on-primary shadow-[0_4px_20px_rgba(224,64,160,0.4)] flex items-center justify-center z-50 hover:scale-110 active:scale-95 transition-all duration-300">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</button>
+</body></html>

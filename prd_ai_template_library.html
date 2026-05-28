@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PRD.ai - Template Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#001a33",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#2e2040",
+                        "on-tertiary-container": "#00334d",
+                        "on-secondary-fixed": "#1a1030",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#2e1a28",
+                        "background": "#fef7ff",
+                        "tertiary-container": "#40c0ee",
+                        "on-secondary-fixed-variant": "#4a3068",
+                        "on-primary-fixed": "#3d0028",
+                        "on-primary-container": "#2e1a28",
+                        "inverse-surface": "#2e1a28",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#c8eaff",
+                        "primary-fixed": "#ffd6ee",
+                        "tertiary": "#0096cc",
+                        "on-surface-variant": "#604868",
+                        "primary-fixed-dim": "#f0a0cc",
+                        "surface-container-high": "#f2e8f2",
+                        "primary-container": "#f080c0",
+                        "surface-container": "#f8eef8",
+                        "secondary": "#7c52aa",
+                        "surface": "#fef7ff",
+                        "surface-container-highest": "#ece2ec",
+                        "outline-variant": "#dcc8e0",
+                        "error": "#e53e3e",
+                        "surface-bright": "#fef7ff",
+                        "secondary-fixed": "#eedcff",
+                        "secondary-container": "#eedcff",
+                        "on-surface": "#2e1a28",
+                        "primary": "#e040a0",
+                        "on-tertiary-fixed-variant": "#005580",
+                        "error-container": "#ffe8e8",
+                        "surface-variant": "#f2e8f2",
+                        "surface-dim": "#e0d6e0",
+                        "secondary-fixed-dim": "#c8a8e8",
+                        "on-error-container": "#9b1c1c",
+                        "surface-tint": "#e040a0",
+                        "inverse-primary": "#f0a0cc",
+                        "tertiary-fixed-dim": "#80d0f0",
+                        "on-primary-fixed-variant": "#a02070",
+                        "outline": "#907898",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#fbf2fb",
+                        "inverse-on-surface": "#fef7ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["DM Sans", "sans-serif"],
+                        "display": ["DM Sans", "sans-serif"],
+                        "body": ["DM Sans", "sans-serif"],
+                        "label": ["DM Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'DM Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1; }
+        .blob-1 { position: fixed; top: -10%; left: -5%; width: 40vw; height: 40vw; background: radial-gradient(circle, rgba(224,64,160,0.1) 0%, rgba(224,64,160,0) 70%); border-radius: 50%; z-index: -1; }
+        .blob-2 { position: fixed; bottom: -15%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(124,82,170,0.1) 0%, rgba(124,82,170,0) 70%); border-radius: 50%; z-index: -1; }
+        .blob-3 { position: fixed; top: 40%; right: 10%; width: 30vw; height: 30vw; background: radial-gradient(circle, rgba(0,150,204,0.1) 0%, rgba(0,150,204,0) 70%); border-radius: 50%; z-index: -1; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+<div class="blob-1"></div>
+<div class="blob-2"></div>
+<div class="blob-3"></div>
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex bg-surface-container-low border-r border-outline-variant shadow-xl h-screen w-64 rounded-r-lg flex-col p-4 gap-2 sticky top-0 shrink-0 z-40">
+<div class="flex items-center gap-3 px-4 py-6">
+<span class="material-symbols-outlined text-primary text-3xl fill" data-icon="polymer" data-weight="fill">polymer</span>
+<div>
+<h1 class="text-xl font-black text-primary tracking-tight">PRD.ai</h1>
+<p class="text-xs text-on-surface-variant font-medium">AI Copilot</p>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary font-bold py-3 px-6 rounded-full shadow-[0_4px_16px_rgba(224,64,160,0.2)] hover:scale-[1.03] active:scale-95 transition-all duration-200 ease-out mb-6 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+            New PRD
+        </button>
+<div class="flex-1 flex flex-col gap-2 font-body text-label-lg font-medium">
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                Documents
+            </a>
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-full px-4 py-3 font-bold shadow-[0_4px_16px_rgba(240,128,192,0.15)] active:scale-95 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+                Templates
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+                Analytics
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-2 font-body text-label-lg font-medium border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant rounded-full px-4 py-3 hover:bg-surface-container-highest hover:scale-[1.03] transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-h-screen relative z-10">
+<!-- TopAppBar -->
+<header class="bg-surface/80 backdrop-blur-md shadow-[0_4px_16px_rgba(224,64,160,0.05)] flex justify-between items-center px-6 py-3 w-full sticky top-0 z-50">
+<!-- Mobile Brand -->
+<div class="md:hidden flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl fill" data-icon="polymer" data-weight="fill">polymer</span>
+<span class="text-2xl font-black text-primary tracking-tight">PRD.ai</span>
+</div>
+<!-- Desktop Search/Title -->
+<div class="hidden md:flex items-center bg-surface-container-highest rounded-full px-4 py-2 w-96 focus-within:ring-2 focus-within:ring-primary focus-within:bg-surface transition-all duration-300">
+<span class="material-symbols-outlined text-on-surface-variant mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-on-surface font-medium placeholder:text-on-surface-variant/70" placeholder="Search templates..." type="text"/>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary hover:scale-105 transition-transform duration-200 ease-out relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-primary hover:scale-105 transition-transform duration-200 ease-out hidden sm:block">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="hidden sm:block px-4 py-2 text-primary font-bold hover:bg-primary-container/50 rounded-full transition-colors duration-200">
+                    Share
+                </button>
+<button class="hidden sm:block px-4 py-2 bg-primary-container text-on-primary-container font-bold rounded-full hover:scale-105 shadow-[0_2px_8px_rgba(240,128,192,0.2)] transition-all duration-200">
+                    Export
+                </button>
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold cursor-pointer hover:scale-105 shadow-sm transition-transform duration-200">
+<img alt="User profile" class="w-full h-full rounded-full object-cover" data-alt="A bright, cheerful portrait photo of a young professional user with a warm smile, set against a soft pastel background. The lighting is studio-quality and even, complementing the playful hot pink and purple UI aesthetic of the application. The image feels modern, approachable, and high-quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvTQyqV_tBgFxw7dV9jCUIfpIg9-hXcY7uoU37TRgIek-HloXVKtP-irWq5x5HlzhqRwvhj86FgX9dztKZxLqXgkaXMiPq-vj717YJL45UcyXeduexow_RX1okudqeRhizALretvNbYqlScQumol1FVrV0RKuUncq3m1IsPQrn6Qumzn9HQSHY7Zi7V77PwcnguL-SCFDmtnq1jeSpcw4yVYy5Ib3H-DOuKwztoQrCz_tWQ70vfajSuVQR-TjrVOL-tYHZI6qEEHg"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+<div class="mb-10">
+<h2 class="text-4xl md:text-5xl font-black text-on-background mb-4 tracking-tight leading-tight">
+                    Start with a <span class="text-primary relative inline-block">Template
+                        <svg class="absolute w-full h-3 -bottom-1 left-0 text-primary-fixed-dim" preserveaspectratio="none" viewbox="0 0 100 10">
+<path d="M0 5 Q 50 10 100 5" fill="transparent" stroke="currentColor" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+</span>
+</h2>
+<p class="text-lg text-on-surface-variant max-w-2xl font-medium">Kickstart your product documentation with our expertly crafted, AI-ready templates designed for every type of feature or product.</p>
+</div>
+<!-- Categories -->
+<div class="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
+<button class="px-5 py-2 bg-primary text-on-primary font-bold rounded-full shadow-[0_4px_12px_rgba(224,64,160,0.2)] whitespace-nowrap hover:scale-105 transition-transform duration-200">All Templates</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface font-medium rounded-full hover:bg-primary-container hover:text-on-primary-container whitespace-nowrap transition-colors duration-200">Mobile Apps</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface font-medium rounded-full hover:bg-primary-container hover:text-on-primary-container whitespace-nowrap transition-colors duration-200">SaaS Features</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface font-medium rounded-full hover:bg-primary-container hover:text-on-primary-container whitespace-nowrap transition-colors duration-200">E-commerce</button>
+<button class="px-5 py-2 bg-surface-container-high text-on-surface font-medium rounded-full hover:bg-primary-container hover:text-on-primary-container whitespace-nowrap transition-colors duration-200">Internal Tools</button>
+</div>
+<!-- Template Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="group bg-surface rounded-lg p-6 shadow-[0_8px_24px_rgba(224,64,160,0.06)] hover:shadow-[0_12px_32px_rgba(224,64,160,0.15)] hover:-translate-y-2 transition-all duration-300 ease-out border border-surface-container-highest flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-fixed/30 rounded-bl-full -mr-8 -mt-8 z-0 transition-transform duration-500 group-hover:scale-110"></div>
+<div class="relative z-10">
+<div class="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center mb-6 shadow-[0_4px_12px_rgba(224,64,160,0.3)]">
+<span class="material-symbols-outlined text-3xl" data-icon="smartphone">smartphone</span>
+</div>
+<span class="inline-block px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-xs font-bold rounded-full mb-3 uppercase tracking-wider">Mobile App</span>
+<h3 class="text-2xl font-bold text-on-background mb-3">Consumer iOS App</h3>
+<p class="text-on-surface-variant font-medium mb-6 leading-relaxed">A comprehensive PRD structure tailored for consumer-facing iOS applications, including user flows and App Store guidelines.</p>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-highest flex gap-3 relative z-10">
+<button class="flex-1 bg-surface-container-highest text-on-surface font-bold py-2.5 rounded-full hover:bg-surface-dim transition-colors duration-200">Preview</button>
+<button class="flex-1 bg-primary text-on-primary font-bold py-2.5 rounded-full shadow-[0_4px_12px_rgba(224,64,160,0.2)] hover:scale-105 transition-transform duration-200">Use</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface rounded-lg p-6 shadow-[0_8px_24px_rgba(124,82,170,0.06)] hover:shadow-[0_12px_32px_rgba(124,82,170,0.15)] hover:-translate-y-2 transition-all duration-300 ease-out border border-surface-container-highest flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary-fixed/50 rounded-bl-full -mr-8 -mt-8 z-0 transition-transform duration-500 group-hover:scale-110"></div>
+<div class="relative z-10">
+<div class="w-14 h-14 bg-secondary text-on-secondary rounded-full flex items-center justify-center mb-6 shadow-[0_4px_12px_rgba(124,82,170,0.3)]">
+<span class="material-symbols-outlined text-3xl" data-icon="dashboard">dashboard</span>
+</div>
+<span class="inline-block px-3 py-1 bg-secondary-fixed text-on-secondary-fixed-variant text-xs font-bold rounded-full mb-3 uppercase tracking-wider">SaaS Feature</span>
+<h3 class="text-2xl font-bold text-on-background mb-3">B2B Dashboard</h3>
+<p class="text-on-surface-variant font-medium mb-6 leading-relaxed">Define complex data visualizations, user permissions, and reporting requirements for enterprise SaaS dashboards.</p>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-highest flex gap-3 relative z-10">
+<button class="flex-1 bg-surface-container-highest text-on-surface font-bold py-2.5 rounded-full hover:bg-surface-dim transition-colors duration-200">Preview</button>
+<button class="flex-1 bg-primary text-on-primary font-bold py-2.5 rounded-full shadow-[0_4px_12px_rgba(224,64,160,0.2)] hover:scale-105 transition-transform duration-200">Use</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface rounded-lg p-6 shadow-[0_8px_24px_rgba(0,150,204,0.06)] hover:shadow-[0_12px_32px_rgba(0,150,204,0.15)] hover:-translate-y-2 transition-all duration-300 ease-out border border-surface-container-highest flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-tertiary-fixed/50 rounded-bl-full -mr-8 -mt-8 z-0 transition-transform duration-500 group-hover:scale-110"></div>
+<div class="relative z-10">
+<div class="w-14 h-14 bg-tertiary text-on-tertiary rounded-full flex items-center justify-center mb-6 shadow-[0_4px_12px_rgba(0,150,204,0.3)]">
+<span class="material-symbols-outlined text-3xl" data-icon="shopping_cart">shopping_cart</span>
+</div>
+<span class="inline-block px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant text-xs font-bold rounded-full mb-3 uppercase tracking-wider">E-commerce</span>
+<h3 class="text-2xl font-bold text-on-background mb-3">Checkout Flow</h3>
+<p class="text-on-surface-variant font-medium mb-6 leading-relaxed">Optimize conversion with a structured approach to cart management, payment gateways, and order confirmation logic.</p>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-highest flex gap-3 relative z-10">
+<button class="flex-1 bg-surface-container-highest text-on-surface font-bold py-2.5 rounded-full hover:bg-surface-dim transition-colors duration-200">Preview</button>
+<button class="flex-1 bg-primary text-on-primary font-bold py-2.5 rounded-full shadow-[0_4px_12px_rgba(224,64,160,0.2)] hover:scale-105 transition-transform duration-200">Use</button>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface rounded-lg p-6 shadow-[0_8px_24px_rgba(224,64,160,0.06)] hover:shadow-[0_12px_32px_rgba(224,64,160,0.15)] hover:-translate-y-2 transition-all duration-300 ease-out border border-surface-container-highest flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-fixed/30 rounded-bl-full -mr-8 -mt-8 z-0 transition-transform duration-500 group-hover:scale-110"></div>
+<div class="relative z-10">
+<div class="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center mb-6 shadow-[0_4px_12px_rgba(224,64,160,0.3)]">
+<span class="material-symbols-outlined text-3xl" data-icon="api">api</span>
+</div>
+<span class="inline-block px-3 py-1 bg-primary-fixed text-on-primary-fixed-variant text-xs font-bold rounded-full mb-3 uppercase tracking-wider">Technical</span>
+<h3 class="text-2xl font-bold text-on-background mb-3">API Integration</h3>
+<p class="text-on-surface-variant font-medium mb-6 leading-relaxed">Document endpoints, payload structures, auth methods, and rate limits for seamless third-party service integration.</p>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-highest flex gap-3 relative z-10">
+<button class="flex-1 bg-surface-container-highest text-on-surface font-bold py-2.5 rounded-full hover:bg-surface-dim transition-colors duration-200">Preview</button>
+<button class="flex-1 bg-primary text-on-primary font-bold py-2.5 rounded-full shadow-[0_4px_12px_rgba(224,64,160,0.2)] hover:scale-105 transition-transform duration-200">Use</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-surface/90 backdrop-blur-lg border-t border-surface-container-highest px-6 py-3 flex justify-between items-center z-50 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] pb-safe">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="text-[10px] font-bold">Dash</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-[10px] font-bold">Docs</span>
+</a>
+<div class="relative -top-5">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-[0_4px_16px_rgba(224,64,160,0.4)] hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<div class="bg-primary-container px-4 py-1 rounded-full mb-1">
+<span class="material-symbols-outlined fill" data-icon="auto_awesome_motion">auto_awesome_motion</span>
+</div>
+<span class="text-[10px] font-bold">Templates</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="text-[10px] font-bold">Stats</span>
+</a>
+</nav>
+</body></html>
