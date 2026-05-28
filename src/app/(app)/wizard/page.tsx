@@ -292,7 +292,7 @@ export default function WizardPage() {
 
   // ─── Progress Bar ─────────────────────────────────────────────────────────
 
-  const progressPercent = ((currentStep + 1) / STEP_LABELS.length) * 100;
+  const progressPercent = (currentStep / (STEP_LABELS.length - 1)) * 100;
 
   // ─── Transition classes ───────────────────────────────────────────────────
 
@@ -739,15 +739,15 @@ export default function WizardPage() {
           </p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mb-10 relative">
+        {/* Progress Bar & Stepper */}
+        <div className="mb-10 relative px-3">
           {/* Step Labels */}
-          <div className="flex justify-between mb-2">
+          <div className="flex justify-between mb-4">
             {STEP_LABELS.map((label, idx) => (
               <span
                 key={label}
-                className={`text-label-md font-bold transition-colors duration-300 text-xs md:text-sm ${
-                  idx <= currentStep ? 'text-primary' : 'text-outline'
+                className={`text-xs md:text-sm font-extrabold transition-colors duration-300 ${
+                  idx <= currentStep ? 'text-primary' : 'text-on-surface-variant/40'
                 }`}
               >
                 <span className="hidden sm:inline">{label}</span>
@@ -756,40 +756,43 @@ export default function WizardPage() {
             ))}
           </div>
 
-          {/* Bar Track */}
-          <div className="w-full bg-surface-container-high rounded-full h-3 relative overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-primary to-secondary h-3 rounded-full shadow-[0_2px_8px_rgba(224,64,160,0.4)] transition-all duration-500 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
+          {/* Stepper Track & Dots Container */}
+          <div className="relative flex items-center h-8">
+            {/* Bar Track */}
+            <div className="w-full bg-surface-container-high rounded-full h-1.5 z-0">
+              <div
+                className="bg-gradient-to-r from-primary to-secondary h-full rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
 
-          {/* Step Dots */}
-          <div className="absolute top-6 left-0 w-full flex justify-between px-0">
-            {STEP_LABELS.map((_, idx) => {
-              const isCompleted = idx < currentStep;
-              const isCurrent = idx === currentStep;
-              const isFuture = idx > currentStep;
-              return (
-                <div
-                  key={idx}
-                  className={`w-6 h-6 rounded-full flex items-center justify-center -mt-[18px] transition-all duration-300 ${
-                    isCompleted
-                      ? 'bg-primary shadow-[0_2px_8px_rgba(224,64,160,0.3)]'
-                      : isCurrent
-                      ? 'bg-secondary border-4 border-white shadow-[0_2px_8px_rgba(124,82,170,0.3)]'
-                      : 'bg-surface-container-high'
-                  } ${idx === 0 ? '-ml-0' : idx === STEP_LABELS.length - 1 ? '-mr-0' : ''}`}
-                >
-                  {isCompleted && (
-                    <span className="material-symbols-outlined text-on-primary text-xs font-bold">check</span>
-                  )}
-                  {isFuture && (
-                    <span className="text-on-surface-variant text-xs font-bold">{idx + 1}</span>
-                  )}
-                </div>
-              );
-            })}
+            {/* Step Dots */}
+            <div className="absolute inset-x-0 top-0 bottom-0 flex justify-between items-center z-10 pointer-events-none">
+              {STEP_LABELS.map((_, idx) => {
+                const isCompleted = idx < currentStep;
+                const isCurrent = idx === currentStep;
+                return (
+                  <div
+                    key={idx}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${
+                      isCompleted
+                        ? 'bg-primary text-white shadow-[0_2px_8px_rgba(224,64,160,0.3)]'
+                        : isCurrent
+                        ? 'bg-primary border-4 border-white text-white shadow-[0_2px_8px_rgba(224,64,160,0.4)] scale-110'
+                        : 'bg-surface-container-high text-on-surface-variant/40 border-2 border-transparent'
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <span className="material-symbols-outlined text-white text-[10px] font-black">check</span>
+                    ) : (
+                      <span className={`text-[10px] font-black ${isCurrent ? 'text-white' : 'text-on-surface-variant/50'}`}>
+                        {idx + 1}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
