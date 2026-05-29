@@ -5,46 +5,34 @@ import { useRouter } from 'next/navigation';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface AIQuestion {
+  id: string;
+  question: string;
+  type: 'text' | 'chips';
+  options?: string[];
+  allowCustom?: boolean;
+  multiSelect?: boolean;
+}
+
 interface WizardFormData {
   productName: string;
   productDescription: string;
-  primaryGoal: string;
-  targetAudience: string;
-  platforms: string[];
-  features: string[];
+  techPreference: 'ai' | 'manual' | null;
+  techStack: string[];
 }
 
 type StepKey = 0 | 1 | 2 | 3;
 
-interface PlatformOption {
-  id: string;
-  label: string;
-  icon: string;
-}
-
-interface SuggestedFeatureMap {
-  [platform: string]: string[];
-}
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STEP_LABELS = ['Product Info', 'Goals & Audience', 'Key Features', 'Generate'] as const;
+const STEP_LABELS = ['Product Info', 'Tech Stack', 'AI Questions', 'Generate'] as const;
 
-const PLATFORM_OPTIONS: PlatformOption[] = [
-  { id: 'Web', label: 'Web', icon: 'desktop_windows' },
-  { id: 'iOS', label: 'iOS', icon: 'smartphone' },
-  { id: 'Android', label: 'Android', icon: 'android' },
-  { id: 'Wearable', label: 'Wearable', icon: 'watch' },
-  { id: 'Desktop', label: 'Desktop', icon: 'laptop_mac' },
+const TECH_CATEGORIES: { category: string; items: string[] }[] = [
+  { category: 'Frontend', items: ['React', 'Vue', 'Angular', 'Svelte', 'Next.js', 'Flutter', 'React Native', 'Swift', 'Kotlin'] },
+  { category: 'Backend', items: ['Node.js', 'Python', 'Go', 'Java', 'Rust', 'PHP', 'Ruby', '.NET'] },
+  { category: 'Database', items: ['PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Firebase', 'Supabase'] },
+  { category: 'Cloud/Infra', items: ['AWS', 'GCP', 'Azure', 'Vercel', 'Docker', 'Kubernetes'] },
 ];
-
-const SUGGESTED_FEATURES: SuggestedFeatureMap = {
-  Web: ['Responsive Dashboard', 'User Authentication', 'Search & Filtering', 'Dark Mode', 'Data Export'],
-  iOS: ['Push Notifications', 'Biometric Login', 'Offline Mode', 'Widget Support', 'Haptic Feedback'],
-  Android: ['Push Notifications', 'Material You Theming', 'Offline Mode', 'Home Screen Widgets', 'Background Sync'],
-  Wearable: ['Health Metrics', 'Glanceable UI', 'Haptic Alerts', 'Complication Support', 'Voice Commands'],
-  Desktop: ['Keyboard Shortcuts', 'System Tray Integration', 'Auto Updates', 'Multi-Window Support', 'File System Access'],
-};
 
 const BG_STYLE = {
   backgroundColor: '#fef7ff',
@@ -64,16 +52,18 @@ export default function WizardPage() {
   const [formData, setFormData] = useState<WizardFormData>({
     productName: '',
     productDescription: '',
-    primaryGoal: '',
-    targetAudience: '',
-    platforms: [],
-    features: [],
+    techPreference: null,
+    techStack: [],
   });
 
-  // Step 3: feature input
-  const [featureInput, setFeatureInput] = useState('');
+  // AI Questions state
+  const [aiQuestions, setAiQuestions] = useState<AIQuestion[]>([]);
+  const [aiAnswers, setAiAnswers] = useState<Record<string, string | string[]>>({});
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionsError, setQuestionsError] = useState<string | null>(null);
+  const [customInputs, setCustomInputs] = useState<Record<string, string>>({});
 
-  // Step 4: generation
+  // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState('');
   const [documentId, setDocumentId] = useState<string | null>(null);
@@ -101,9 +91,11 @@ export default function WizardPage() {
         case 0:
           return formData.productName.trim().length > 0 && formData.productDescription.trim().length > 0;
         case 1:
-          return formData.primaryGoal.trim().length > 0 && formData.targetAudience.trim().length > 0;
+          if (!formData.techPreference) return false;
+          if (formData.techPreference === 'manual') return formData.techStack.length >= 1;
+          return true;
         case 2:
-          return formData.features.length >= 1;
+          return true; // AI questions are optional (can skip)
         case 3:
           return true;
         default:
@@ -143,55 +135,108 @@ export default function WizardPage() {
   // ─── Form Handlers ───────────────────────────────────────────────────────
 
   const updateField = useCallback(
-    (field: keyof WizardFormData, value: string | string[]) => {
+    (field: keyof WizardFormData, value: string | string[] | 'ai' | 'manual' | null) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
     },
     []
   );
 
-  const togglePlatform = useCallback((platformId: string) => {
+  const toggleTech = useCallback((tech: string) => {
     setFormData((prev) => ({
       ...prev,
-      platforms: prev.platforms.includes(platformId)
-        ? prev.platforms.filter((p) => p !== platformId)
-        : [...prev.platforms, platformId],
+      techStack: prev.techStack.includes(tech)
+        ? prev.techStack.filter((t) => t !== tech)
+        : [...prev.techStack, tech],
     }));
   }, []);
 
-  const addFeature = useCallback(() => {
-    const trimmed = featureInput.trim();
-    if (trimmed && !formData.features.includes(trimmed)) {
-      setFormData((prev) => ({ ...prev, features: [...prev.features, trimmed] }));
-      setFeatureInput('');
-    }
-  }, [featureInput, formData.features]);
+  // ─── AI Questions ─────────────────────────────────────────────────────────
 
-  const removeFeature = useCallback((feature: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      features: prev.features.filter((f) => f !== feature),
-    }));
-  }, []);
+  const fetchAIQuestions = useCallback(async () => {
+    setLoadingQuestions(true);
+    setQuestionsError(null);
+    try {
+      const res = await fetch('/api/documents/generate-questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: formData.productName,
+          productDescription: formData.productDescription,
+          techPreference: formData.techPreference,
+          techStack: formData.techStack,
+        }),
+      });
 
-  const addSuggestedFeatures = useCallback(() => {
-    const suggestions: string[] = [];
-    formData.platforms.forEach((platform) => {
-      const platformFeatures = SUGGESTED_FEATURES[platform];
-      if (platformFeatures) {
-        platformFeatures.forEach((f) => {
-          if (!formData.features.includes(f) && !suggestions.includes(f)) {
-            suggestions.push(f);
-          }
-        });
+      if (!res.ok) {
+        throw new Error('Failed to generate questions');
       }
-    });
-    if (suggestions.length > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        features: [...prev.features, ...suggestions],
-      }));
+
+      const data = await res.json();
+      setAiQuestions(data.questions || []);
+      // Reset answers when new questions arrive
+      setAiAnswers({});
+      setCustomInputs({});
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load questions';
+      setQuestionsError(message);
+    } finally {
+      setLoadingQuestions(false);
     }
-  }, [formData.platforms, formData.features]);
+  }, [formData.productName, formData.productDescription, formData.techPreference, formData.techStack]);
+
+  // Fetch questions when entering step 2
+  useEffect(() => {
+    if (currentStep === 2 && aiQuestions.length === 0 && !loadingQuestions) {
+      fetchAIQuestions();
+    }
+  }, [currentStep, aiQuestions.length, loadingQuestions, fetchAIQuestions]);
+
+  const toggleChipAnswer = useCallback((questionId: string, option: string) => {
+    setAiAnswers((prev) => {
+      const current = prev[questionId];
+      if (Array.isArray(current)) {
+        return {
+          ...prev,
+          [questionId]: current.includes(option)
+            ? current.filter((o) => o !== option)
+            : [...current, option],
+        };
+      }
+      return { ...prev, [questionId]: [option] };
+    });
+  }, []);
+
+  const setTextAnswer = useCallback((questionId: string, value: string) => {
+    setAiAnswers((prev) => ({ ...prev, [questionId]: value }));
+  }, []);
+
+  const addCustomChip = useCallback((questionId: string) => {
+    const value = customInputs[questionId]?.trim();
+    if (!value) return;
+    setAiAnswers((prev) => {
+      const current = prev[questionId];
+      const arr = Array.isArray(current) ? current : [];
+      if (arr.includes(value)) return prev;
+      return { ...prev, [questionId]: [...arr, value] };
+    });
+    setCustomInputs((prev) => ({ ...prev, [questionId]: '' }));
+  }, [customInputs]);
+
+  const skipQuestion = useCallback((questionId: string) => {
+    setAiAnswers((prev) => {
+      const next = { ...prev };
+      delete next[questionId];
+      return next;
+    });
+  }, []);
+
+  // Count answered questions
+  const answeredCount = aiQuestions.filter((q) => {
+    const ans = aiAnswers[q.id];
+    if (Array.isArray(ans)) return ans.length > 0;
+    if (typeof ans === 'string') return ans.trim().length > 0;
+    return false;
+  }).length;
 
   // ─── Generation ───────────────────────────────────────────────────────────
 
@@ -209,15 +254,15 @@ export default function WizardPage() {
         body: JSON.stringify({
           productName: formData.productName,
           productDescription: formData.productDescription,
-          primaryGoal: formData.primaryGoal,
-          targetAudience: formData.targetAudience,
-          platforms: formData.platforms,
-          features: formData.features,
+          techPreference: formData.techPreference,
+          techStack: formData.techStack,
+          aiAnswers,
+          platforms: [],
+          features: [],
         }),
       });
 
       if (!response.ok) {
-        // Try to read error message from JSON body
         let errorMsg = `Generation failed (status ${response.status})`;
         try {
           const errBody = await response.json();
@@ -233,9 +278,7 @@ export default function WizardPage() {
         throw new Error('No response body received');
       }
 
-      // Also try header (may work in some environments)
       const headerDocId = response.headers.get('X-Document-Id');
-
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let fullContent = '';
@@ -247,7 +290,6 @@ export default function WizardPage() {
         if (done) break;
         let chunk = decoder.decode(value, { stream: true });
 
-        // Parse document ID from first chunk prefix
         if (isFirstChunk) {
           isFirstChunk = false;
           if (chunk.startsWith('__DOC_ID__:')) {
@@ -267,12 +309,10 @@ export default function WizardPage() {
         setGeneratedContent(fullContent);
       }
 
-      // If we got a docId from header but not set yet
       if (docId && !documentId) {
         setDocumentId(docId);
       }
 
-      // Save the final content to the document
       if (docId) {
         await fetch(`/api/documents/${docId}`, {
           method: 'PUT',
@@ -288,7 +328,7 @@ export default function WizardPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [formData, documentId]);
+  }, [formData, aiAnswers, documentId]);
 
   // ─── Progress Bar ─────────────────────────────────────────────────────────
 
@@ -304,9 +344,9 @@ export default function WizardPage() {
 
   // ─── Render Steps ─────────────────────────────────────────────────────────
 
+  // Step 0: Product Info
   const renderStep0 = () => (
     <div className="space-y-8">
-      {/* Product Name */}
       <div className="space-y-3">
         <label className="block font-label text-lg font-bold text-on-background" htmlFor="product_name">
           What&apos;s your product called?
@@ -326,7 +366,6 @@ export default function WizardPage() {
         </div>
       </div>
 
-      {/* Product Description */}
       <div className="space-y-3">
         <label className="block font-label text-lg font-bold text-on-background" htmlFor="product_desc">
           Describe your product in a few sentences
@@ -346,174 +385,267 @@ export default function WizardPage() {
     </div>
   );
 
+  // Step 1: Tech Preferences
   const renderStep1 = () => (
     <div className="space-y-8">
-      {/* Primary Goal */}
       <div className="space-y-3">
-        <label className="block font-label text-lg font-bold text-on-background" htmlFor="primary_goal">
-          What is the primary goal of this product?
+        <label className="block font-label text-lg font-bold text-on-background">
+          Preferensi teknologi
         </label>
-        <textarea
-          id="primary_goal"
-          value={formData.primaryGoal}
-          onChange={(e) => updateField('primaryGoal', e.target.value)}
-          placeholder="e.g., Increase user retention by 20% by simplifying the onboarding flow."
-          rows={3}
-          className="w-full bg-surface-container rounded-lg border-2 border-transparent focus:border-primary focus:ring-0 text-on-surface p-4 text-lg transition-all duration-200 resize-none hover:bg-surface-container-highest outline-none"
-        />
-        <p className="text-sm text-on-surface-variant pl-2">
-          Try to be specific and measurable if possible.
+        <p className="text-on-surface-variant text-sm">
+          Udah punya pilihan tech stack, atau mau AI yang tentuin?
         </p>
       </div>
 
-      {/* Target Audience */}
-      <div className="space-y-3">
-        <label className="block font-label text-lg font-bold text-on-background" htmlFor="target_audience">
-          Who is your target audience?
-        </label>
-        <div className="relative">
-          <span className="material-symbols-outlined absolute left-4 top-4 text-tertiary">groups</span>
-          <input
-            id="target_audience"
-            type="text"
-            value={formData.targetAudience}
-            onChange={(e) => updateField('targetAudience', e.target.value)}
-            placeholder="e.g., Freelance designers, Small business owners..."
-            className="w-full bg-surface-container rounded-lg border-2 border-transparent focus:border-primary focus:ring-0 text-on-surface py-4 pl-12 pr-4 text-lg transition-all duration-200 hover:bg-surface-container-highest outline-none"
-          />
-        </div>
+      {/* Two selectable cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* AI Pick */}
+        <button
+          type="button"
+          onClick={() => updateField('techPreference', 'ai')}
+          className={`group relative p-6 rounded-2xl border-2 text-left transition-all duration-300 hover:scale-[1.02] ${
+            formData.techPreference === 'ai'
+              ? 'border-primary bg-primary-container shadow-[0_4px_20px_rgba(224,64,160,0.2)]'
+              : 'border-outline-variant bg-surface hover:border-primary/50'
+          }`}
+        >
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+            formData.techPreference === 'ai' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant'
+          }`}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+          </div>
+          <h3 className="font-black text-on-background text-lg mb-1">Biarkan AI pilih</h3>
+          <p className="text-sm text-on-surface-variant">AI rekomendasiin stack yang paling cocok buat project kamu</p>
+          {formData.techPreference === 'ai' && (
+            <div className="absolute top-4 right-4">
+              <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            </div>
+          )}
+        </button>
+
+        {/* Manual Pick */}
+        <button
+          type="button"
+          onClick={() => updateField('techPreference', 'manual')}
+          className={`group relative p-6 rounded-2xl border-2 text-left transition-all duration-300 hover:scale-[1.02] ${
+            formData.techPreference === 'manual'
+              ? 'border-secondary bg-secondary-fixed shadow-[0_4px_20px_rgba(124,82,170,0.2)]'
+              : 'border-outline-variant bg-surface hover:border-secondary/50'
+          }`}
+        >
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+            formData.techPreference === 'manual' ? 'bg-secondary text-on-secondary' : 'bg-surface-container-high text-on-surface-variant'
+          }`}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
+          </div>
+          <h3 className="font-black text-on-background text-lg mb-1">Pilih sendiri</h3>
+          <p className="text-sm text-on-surface-variant">Kamu tentuin teknologi yang mau dipakai</p>
+          {formData.techPreference === 'manual' && (
+            <div className="absolute top-4 right-4">
+              <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            </div>
+          )}
+        </button>
       </div>
 
-      {/* Platforms */}
-      <div className="space-y-3">
-        <label className="block font-label text-lg font-bold text-on-background">Target Platforms</label>
-        <div className="flex flex-wrap gap-3">
-          {PLATFORM_OPTIONS.map((platform) => {
-            const isActive = formData.platforms.includes(platform.id);
-            return (
-              <button
-                key={platform.id}
-                type="button"
-                onClick={() => togglePlatform(platform.id)}
-                className={`px-6 py-2 rounded-full border-2 font-bold transition-all duration-200 ease-out flex items-center gap-2 hover:scale-105 ${
-                  isActive
-                    ? 'border-primary bg-primary-container text-on-primary-container shadow-[0_2px_8px_rgba(224,64,160,0.2)]'
-                    : 'border-outline-variant bg-surface text-on-surface-variant hover:border-primary'
-                }`}
-              >
-                <span
-                  className="material-symbols-outlined text-sm"
-                  style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                >
-                  {platform.icon}
-                </span>
-                {platform.label}
-              </button>
-            );
-          })}
+      {/* Manual tech stack selection */}
+      {formData.techPreference === 'manual' && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          {TECH_CATEGORIES.map((cat) => (
+            <div key={cat.category} className="space-y-3">
+              <p className="text-sm font-extrabold text-on-surface-variant uppercase tracking-wider">{cat.category}</p>
+              <div className="flex flex-wrap gap-2">
+                {cat.items.map((tech) => {
+                  const isSelected = formData.techStack.includes(tech);
+                  return (
+                    <button
+                      key={tech}
+                      type="button"
+                      onClick={() => toggleTech(tech)}
+                      className={`px-4 py-2 rounded-full border-2 font-bold text-sm transition-all duration-200 hover:scale-105 ${
+                        isSelected
+                          ? 'border-primary bg-primary-container text-on-primary-container shadow-[0_2px_8px_rgba(224,64,160,0.15)]'
+                          : 'border-outline-variant bg-surface text-on-surface-variant hover:border-primary/50'
+                      }`}
+                    >
+                      {isSelected && <span className="material-symbols-outlined text-xs mr-1 align-middle">check</span>}
+                      {tech}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          <p className="text-sm text-on-surface-variant">
+            {formData.techStack.length} teknologi dipilih
+            {formData.techStack.length === 0 && (
+              <span className="text-error ml-2">(minimal 1)</span>
+            )}
+          </p>
         </div>
-      </div>
+      )}
     </div>
   );
 
+  // Step 2: AI Questions
   const renderStep2 = () => (
-    <div className="space-y-8">
-      {/* Feature Input */}
-      <div className="space-y-3">
-        <label className="block font-label text-lg font-bold text-on-background" htmlFor="feature_input">
-          Add key features for your product
-        </label>
-        <div className="flex gap-3">
-          <div className="relative flex-1">
-            <span className="material-symbols-outlined absolute left-4 top-3.5 text-secondary">
-              add_circle
-            </span>
-            <input
-              id="feature_input"
-              type="text"
-              value={featureInput}
-              onChange={(e) => setFeatureInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addFeature();
-                }
-              }}
-              placeholder="e.g., User Authentication, Real-time Chat..."
-              className="w-full bg-surface-container rounded-lg border-2 border-transparent focus:border-primary focus:ring-0 text-on-surface py-3 pl-12 pr-4 text-lg transition-all duration-200 hover:bg-surface-container-highest outline-none"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={addFeature}
-            disabled={!featureInput.trim()}
-            className="px-6 py-3 rounded-lg bg-primary text-on-primary font-bold shadow-[0_4px_16px_rgba(224,64,160,0.25)] hover:scale-105 hover:shadow-[0_6px_24px_rgba(224,64,160,0.35)] transition-all duration-200 ease-out disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined text-sm">add</span>
-            Add
-          </button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-black text-on-background text-xl mb-1">Beberapa pertanyaan</h3>
+          <p className="text-on-surface-variant text-sm">Biar PRD-nya lebih akurat. Jawab pertanyaan di bawah.</p>
         </div>
+        <span className="text-sm font-extrabold text-on-surface-variant bg-surface-container-high px-3 py-1 rounded-full">
+          {answeredCount}/{aiQuestions.length}
+        </span>
       </div>
 
-      {/* Suggested Features */}
-      {formData.platforms.length > 0 && (
-        <div>
+      {/* Loading skeleton */}
+      {loadingQuestions && (
+        <div className="space-y-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="animate-pulse space-y-3 p-5 bg-surface-container rounded-2xl border border-outline-variant/30">
+              <div className="h-5 bg-surface-container-high rounded-lg w-3/4" />
+              <div className="flex gap-2">
+                <div className="h-8 bg-surface-container-high rounded-full w-28" />
+                <div className="h-8 bg-surface-container-high rounded-full w-32" />
+                <div className="h-8 bg-surface-container-high rounded-full w-24" />
+              </div>
+            </div>
+          ))}
+          <div className="flex items-center gap-3 px-4 py-3 bg-primary-container rounded-xl">
+            <div className="flex gap-1">
+              <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+            <span className="text-on-primary-container font-bold text-sm">AI sedang membuat pertanyaan...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {questionsError && (
+        <div className="bg-error-container text-on-error-container rounded-xl p-4 flex items-center gap-3">
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+          <p className="flex-1 font-bold text-sm">{questionsError}</p>
           <button
             type="button"
-            onClick={addSuggestedFeatures}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-tertiary-container text-on-tertiary-container font-bold text-sm hover:scale-105 transition-all duration-200 shadow-[0_2px_8px_rgba(0,150,204,0.15)]"
+            onClick={fetchAIQuestions}
+            className="px-4 py-2 bg-error text-on-error rounded-lg font-bold text-sm hover:scale-105 transition-transform"
           >
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-              auto_awesome
-            </span>
-            Add suggested features for {formData.platforms.join(', ')}
+            Coba lagi
           </button>
         </div>
       )}
 
-      {/* Feature Tags */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-on-surface-variant">
-            {formData.features.length} feature{formData.features.length !== 1 ? 's' : ''} added
-            {formData.features.length === 0 && (
-              <span className="text-error ml-2">(minimum 1 required)</span>
-            )}
-          </p>
-        </div>
+      {/* Questions */}
+      {!loadingQuestions && aiQuestions.length > 0 && (
+        <div className="space-y-5">
+          {aiQuestions.map((q, idx) => {
+            const answer = aiAnswers[q.id];
+            const isAnswered = Array.isArray(answer) ? answer.length > 0 : typeof answer === 'string' && answer.trim().length > 0;
 
-        {formData.features.length > 0 && (
-          <div className="flex flex-wrap gap-2.5">
-            {formData.features.map((feature) => (
-              <span
-                key={feature}
-                className="inline-flex items-center gap-1.5 bg-primary-fixed text-on-primary-fixed px-4 py-2 rounded-full text-sm font-bold shadow-sm group hover:shadow-md transition-shadow"
+            return (
+              <div
+                key={q.id}
+                className={`p-5 rounded-2xl border-2 transition-all duration-300 ${
+                  isAnswered
+                    ? 'border-primary/30 bg-primary-fixed/5'
+                    : 'border-outline-variant/30 bg-surface-container'
+                }`}
               >
-                {feature}
-                <button
-                  type="button"
-                  onClick={() => removeFeature(feature)}
-                  className="w-5 h-5 rounded-full bg-on-primary-fixed/20 hover:bg-on-primary-fixed/40 flex items-center justify-center transition-colors ml-1"
-                  aria-label={`Remove ${feature}`}
-                >
-                  <span className="material-symbols-outlined text-xs">close</span>
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
+                {/* Question header */}
+                <div className="flex items-start justify-between mb-3">
+                  <p className="font-bold text-on-background text-base leading-snug flex-1 pr-4">
+                    <span className="text-primary font-black mr-1.5">{idx + 1}.</span>
+                    {q.question}
+                    {q.multiSelect && q.type === 'chips' && (
+                      <span className="text-on-surface-variant text-xs font-normal ml-2">(boleh pilih beberapa)</span>
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => skipQuestion(q.id)}
+                    className="text-xs font-bold text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap"
+                  >
+                    Lewati
+                  </button>
+                </div>
 
-        {formData.features.length === 0 && (
-          <div className="border-2 border-dashed border-outline-variant rounded-2xl p-8 flex flex-col items-center justify-center text-on-surface-variant gap-3">
-            <span className="material-symbols-outlined text-4xl opacity-40">featured_play_list</span>
-            <p className="font-bold text-sm">No features added yet</p>
-            <p className="text-xs">Type a feature above and press Enter or click Add</p>
-          </div>
-        )}
-      </div>
+                {/* Text input */}
+                {q.type === 'text' && (
+                  <textarea
+                    value={typeof answer === 'string' ? answer : ''}
+                    onChange={(e) => setTextAnswer(q.id, e.target.value)}
+                    placeholder="Ketik jawaban..."
+                    rows={2}
+                    className="w-full bg-white/80 rounded-xl border-2 border-transparent focus:border-primary focus:ring-0 text-on-surface p-4 text-sm transition-all duration-200 resize-none hover:bg-white outline-none"
+                  />
+                )}
+
+                {/* Chip options */}
+                {q.type === 'chips' && q.options && (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {q.options.map((opt) => {
+                        const isSelected = Array.isArray(answer) && answer.includes(opt);
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => toggleChipAnswer(q.id, opt)}
+                            className={`px-4 py-2 rounded-full font-bold text-sm border-2 transition-all duration-200 hover:scale-105 ${
+                              isSelected
+                                ? 'border-primary bg-primary-container text-on-primary-container shadow-[0_2px_8px_rgba(224,64,160,0.15)]'
+                                : 'border-outline-variant bg-white text-on-surface-variant hover:border-primary/50'
+                            }`}
+                          >
+                            {isSelected && <span className="material-symbols-outlined text-xs mr-1 align-middle">check</span>}
+                            {opt}
+                          </button>
+                        );
+                      })}
+
+                      {/* Custom add button */}
+                      {q.allowCustom && (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            value={customInputs[q.id] || ''}
+                            onChange={(e) => setCustomInputs((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                addCustomChip(q.id);
+                              }
+                            }}
+                            placeholder="+ Lainnya"
+                            className="px-3 py-2 rounded-full border-2 border-dashed border-outline-variant text-sm bg-transparent focus:border-primary outline-none w-28 font-bold text-on-surface-variant placeholder:text-on-surface-variant/50 transition-colors"
+                          />
+                          {customInputs[q.id]?.trim() && (
+                            <button
+                              type="button"
+                              onClick={() => addCustomChip(q.id)}
+                              className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center hover:scale-110 transition-transform"
+                            >
+                              <span className="material-symbols-outlined text-sm">add</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 
+  // Step 3: Review & Generate
   const renderStep3 = () => (
     <div className="space-y-8">
       {/* Summary */}
@@ -540,54 +672,57 @@ export default function WizardPage() {
 
             <div className="border-t border-outline-variant/30" />
 
-            {/* Goals */}
-            <div className="space-y-1">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Primary Goal</p>
-              <p className="text-on-surface leading-relaxed">{formData.primaryGoal}</p>
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Target Audience</p>
-              <p className="text-on-surface font-medium">{formData.targetAudience}</p>
-            </div>
-
-            <div className="border-t border-outline-variant/30" />
-
-            {/* Platforms */}
+            {/* Tech Stack */}
             <div className="space-y-2">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Platforms</p>
-              <div className="flex flex-wrap gap-2">
-                {formData.platforms.length > 0 ? (
-                  formData.platforms.map((p) => (
-                    <span
-                      key={p}
-                      className="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-sm font-bold"
-                    >
-                      {p}
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Tech Preference</p>
+              {formData.techPreference === 'ai' ? (
+                <p className="text-on-surface font-medium flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                  AI akan merekomendasikan
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {formData.techStack.map((t) => (
+                    <span key={t} className="bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full text-sm font-bold">
+                      {t}
                     </span>
-                  ))
-                ) : (
-                  <span className="text-on-surface-variant text-sm italic">No platforms specified</span>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Features */}
-            <div className="space-y-2">
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-                Features ({formData.features.length})
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {formData.features.map((f) => (
-                  <span
-                    key={f}
-                    className="bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full text-sm font-bold"
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-            </div>
+            {/* AI Answers */}
+            {Object.keys(aiAnswers).length > 0 && (
+              <>
+                <div className="border-t border-outline-variant/30" />
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">AI Questions Answered</p>
+                  {aiQuestions
+                    .filter((q) => {
+                      const ans = aiAnswers[q.id];
+                      if (Array.isArray(ans)) return ans.length > 0;
+                      return typeof ans === 'string' && ans.trim().length > 0;
+                    })
+                    .map((q) => {
+                      const ans = aiAnswers[q.id];
+                      return (
+                        <div key={q.id} className="space-y-1">
+                          <p className="text-xs text-on-surface-variant font-bold">{q.question}</p>
+                          {Array.isArray(ans) ? (
+                            <div className="flex flex-wrap gap-1.5">
+                              {ans.map((a) => (
+                                <span key={a} className="bg-primary-fixed text-on-primary-fixed px-2.5 py-0.5 rounded-full text-xs font-bold">{a}</span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-on-surface text-sm">{ans}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Generate Button */}
@@ -617,7 +752,6 @@ export default function WizardPage() {
       {/* Generating / Generated Content */}
       {(isGenerating || generatedContent) && (
         <div className="space-y-6">
-          {/* Status indicator */}
           {isGenerating && (
             <div className="flex items-center gap-3 px-4 py-3 bg-primary-container rounded-xl">
               <div className="flex gap-1">
@@ -640,7 +774,6 @@ export default function WizardPage() {
             </div>
           )}
 
-          {/* Streaming content */}
           <div
             ref={streamContainerRef}
             className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-6 max-h-[50vh] overflow-y-auto shadow-inner"
@@ -653,7 +786,6 @@ export default function WizardPage() {
             </div>
           </div>
 
-          {/* Post-generation actions */}
           {generationComplete && documentId && (
             <div className="flex flex-col sm:flex-row gap-3">
               <button
@@ -690,8 +822,8 @@ export default function WizardPage() {
 
   const STEP_SUBTITLES: Record<StepKey, string> = {
     0: 'Tell us about your product.',
-    1: 'Define your goals and who you\u2019re building for.',
-    2: 'List the key features you want to include.',
+    1: 'Pilih preferensi teknologi kamu.',
+    2: 'Jawab beberapa pertanyaan dari AI.',
     3: 'Review and generate your PRD.',
   };
 
@@ -758,7 +890,6 @@ export default function WizardPage() {
 
           {/* Stepper Track & Dots Container */}
           <div className="relative flex items-center h-8">
-            {/* Bar Track */}
             <div className="w-full bg-surface-container-high rounded-full h-1.5 z-0">
               <div
                 className="bg-gradient-to-r from-primary to-secondary h-full rounded-full transition-all duration-500 ease-out"
@@ -766,7 +897,6 @@ export default function WizardPage() {
               />
             </div>
 
-            {/* Step Dots */}
             <div className="absolute inset-x-0 top-0 bottom-0 flex justify-between items-center z-10 pointer-events-none">
               {STEP_LABELS.map((_, idx) => {
                 const isCompleted = idx < currentStep;
@@ -818,7 +948,7 @@ export default function WizardPage() {
               }`}
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              Back
+              Kembali
             </button>
 
             {/* Next / Generate */}
@@ -848,7 +978,6 @@ export default function WizardPage() {
           >
             lightbulb
           </span>
-          {/* Tooltip */}
           <div className="absolute bottom-full right-0 mb-4 w-52 bg-inverse-surface text-inverse-on-surface p-3 rounded-lg text-sm shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
             Need help? Each step guides you through building a perfect PRD!
           </div>

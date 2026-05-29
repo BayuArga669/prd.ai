@@ -14,6 +14,18 @@ export interface WizardInputs {
   platforms: string[];
   features: string[];
   templateType?: string;
+  techPreference?: 'ai' | 'manual';
+  techStack?: string[];
+  aiAnswers?: Record<string, string | string[]>;
+}
+
+export interface AIQuestion {
+  id: string;
+  question: string;
+  type: 'text' | 'chips';
+  options?: string[];
+  allowCustom?: boolean;
+  multiSelect?: boolean;
 }
 
 interface GroqMessage {
@@ -71,18 +83,44 @@ function buildUserPrompt(inputs: WizardInputs): string {
     ? inputs.features.map((f, i) => `${i + 1}. ${f}`).join('\n')
     : 'To be defined based on the product goals';
 
+  // Build tech stack section
+  let techSection = '';
+  if (inputs.techPreference === 'manual' && inputs.techStack && inputs.techStack.length > 0) {
+    techSection = `\n**Preferred Technology Stack:** ${inputs.techStack.join(', ')}`;
+  } else if (inputs.techPreference === 'ai') {
+    techSection = '\n**Technology Stack:** Please recommend the most suitable technology stack based on the product requirements.';
+  }
+
+  // Build AI answers section
+  let aiAnswersSection = '';
+  if (inputs.aiAnswers && Object.keys(inputs.aiAnswers).length > 0) {
+    const answersFormatted = Object.entries(inputs.aiAnswers)
+      .filter(([, v]) => {
+        if (Array.isArray(v)) return v.length > 0;
+        return typeof v === 'string' && v.trim().length > 0;
+      })
+      .map(([key, val]) => {
+        const answer = Array.isArray(val) ? val.join(', ') : val;
+        return `- **${key}:** ${answer}`;
+      })
+      .join('\n');
+    if (answersFormatted) {
+      aiAnswersSection = `\n\n**Additional Context from User:**\n${answersFormatted}`;
+    }
+  }
+
   return `Generate a complete PRD for the following product:
 
 **Product Name:** ${inputs.productName}
 **Description:** ${inputs.productDescription}
-**Primary Goal:** ${inputs.primaryGoal}
-**Target Audience:** ${inputs.targetAudience}
-**Target Platforms:** ${platformList}
+**Primary Goal:** ${inputs.primaryGoal || 'To be determined from context'}
+**Target Audience:** ${inputs.targetAudience || 'To be determined from context'}
+**Target Platforms:** ${platformList}${techSection}
 
 **Key Features:**
 ${featureList}
 
-${inputs.templateType ? `**Template Category:** ${inputs.templateType}` : ''}
+${inputs.templateType ? `**Template Category:** ${inputs.templateType}` : ''}${aiAnswersSection}
 
 Please generate a comprehensive, production-ready PRD document now.`;
 }
@@ -229,6 +267,165 @@ export async function generatePRDStream(inputs: WizardInputs): Promise<ReadableS
       }
     },
   });
+}
+
+/**
+ * Generate contextual follow-up questions based on product info.
+ * Calls Groq API and returns structured JSON questions.
+ */
+export async function generateQuestions(
+  productName: string,
+  productDescription: string,
+  techPreference: 'ai' | 'manual',
+  techStack?: string[]
+): Promise<AIQuestion[]> {
+  const apiKey = process.env.GROQ_API_KEY;
+  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+
+  if (!apiKey) {
+    console.warn('GROQ_API_KEY not set — using fallback questions');
+    return getFallbackQuestions(productName);
+  }
+
+  const techInfo = techPreference === 'manual' && techStack && techStack.length > 0
+    ? `The user has chosen these technologies: ${techStack.join(', ')}.`
+    : 'The user wants AI to recommend the tech stack.';
+
+  const systemPrompt = `You are an expert Product Manager helping users build a Product Requirements Document (PRD).
+Based on the product information provided, generate exactly 5 follow-up questions that will help create a more detailed and accurate PRD.
+
+Rules:
+- Questions MUST be in Bahasa Indonesia (Indonesian language)
+- Each question should be concise and clear
+- Mix question types: some should be open-ended text answers, others should have selectable chip options
+- For chip-type questions, provide 4-6 relevant options based on the product
+- Questions should cover: user persona/story, core features, competitive advantage, key user actions, and retention/engagement
+- Make options specific to the product described, not generic
+
+Return ONLY valid JSON array with this exact structure (no markdown, no explanation):
+[
+  {
+    "id": "q1",
+    "question": "...",
+    "type": "text"
+  },
+  {
+    "id": "q2",
+    "question": "...",
+    "type": "chips",
+    "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+    "allowCustom": true,
+    "multiSelect": true
+  }
+]`;
+
+  const userPrompt = `Product Name: ${productName}
+Product Description: ${productDescription}
+Tech Context: ${techInfo}
+
+Generate 5 contextual follow-up questions for this product's PRD.`;
+
+  try {
+    const response = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 2048,
+        top_p: 0.9,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Groq API error for questions:', response.status);
+      return getFallbackQuestions(productName);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      return getFallbackQuestions(productName);
+    }
+
+    // Parse JSON from the response (handle possible markdown wrapping)
+    let jsonStr = content.trim();
+    if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    }
+
+    const questions: AIQuestion[] = JSON.parse(jsonStr);
+
+    // Validate structure
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return getFallbackQuestions(productName);
+    }
+
+    return questions.slice(0, 5).map((q, i) => ({
+      id: q.id || `q${i + 1}`,
+      question: q.question || '',
+      type: q.type === 'chips' ? 'chips' : 'text',
+      options: q.options,
+      allowCustom: q.allowCustom ?? true,
+      multiSelect: q.multiSelect ?? true,
+    }));
+  } catch (error) {
+    console.error('generateQuestions error:', error);
+    return getFallbackQuestions(productName);
+  }
+}
+
+/**
+ * Fallback questions when AI is unavailable
+ */
+function getFallbackQuestions(productName: string): AIQuestion[] {
+  return [
+    {
+      id: 'q1',
+      question: `Ceritakan seseorang yang paling butuh ${productName}. Sekarang mereka ngapain buat mengatasi masalahnya?`,
+      type: 'text',
+    },
+    {
+      id: 'q2',
+      question: `Hal apa yang harus berhasil dilakukan pengguna saat pertama kali buka ${productName}?`,
+      type: 'chips',
+      options: ['Buat akun baru', 'Lihat fitur utama', 'Mulai pakai langsung', 'Import data lama'],
+      allowCustom: true,
+      multiSelect: true,
+    },
+    {
+      id: 'q3',
+      question: `Fitur mana saja yang paling wajib ada di ${productName}? (boleh pilih beberapa)`,
+      type: 'chips',
+      options: ['Dashboard utama', 'Notifikasi', 'Laporan/Analytics', 'Kolaborasi tim', 'Ekspor data'],
+      allowCustom: true,
+      multiSelect: true,
+    },
+    {
+      id: 'q4',
+      question: `Kenapa ${productName} lebih bagus daripada solusi yang sudah ada sekarang?`,
+      type: 'chips',
+      options: ['Lebih cepat', 'Tampilan lebih enak', 'Lebih murah', 'Fitur lebih lengkap'],
+      allowCustom: true,
+      multiSelect: true,
+    },
+    {
+      id: 'q5',
+      question: `Apa yang bikin pengguna mau buka ${productName} terus tiap hari?`,
+      type: 'chips',
+      options: ['Lihat progress', 'Dapat notifikasi penting', 'Update data baru', 'Kolaborasi dengan tim'],
+      allowCustom: true,
+      multiSelect: true,
+    },
+  ];
 }
 
 /**

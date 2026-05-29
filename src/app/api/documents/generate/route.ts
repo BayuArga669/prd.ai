@@ -9,11 +9,14 @@ import { ResultSetHeader } from 'mysql2';
 interface GenerateRequestBody {
   productName: string;
   productDescription: string;
-  primaryGoal: string;
-  targetAudience: string;
-  platforms: string[];
-  features: string[];
+  primaryGoal?: string;
+  targetAudience?: string;
+  platforms?: string[];
+  features?: string[];
   templateType?: string;
+  techPreference?: 'ai' | 'manual';
+  techStack?: string[];
+  aiAnswers?: Record<string, string | string[]>;
 }
 
 /**
@@ -45,38 +48,15 @@ export async function POST(request: Request) {
     console.log('[generate] Body:', JSON.stringify({ productName: body.productName, features: body.features?.length }));
 
     // Validate required fields
-    const requiredFields: (keyof GenerateRequestBody)[] = [
-      'productName',
-      'productDescription',
-      'primaryGoal',
-      'targetAudience',
-      'platforms',
-      'features',
-    ];
-
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        console.log('[generate] Missing field:', field);
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        );
-      }
+    if (!body.productName || typeof body.productName !== 'string' || !body.productName.trim()) {
+      return NextResponse.json({ error: 'Missing required field: productName' }, { status: 400 });
+    }
+    if (!body.productDescription || typeof body.productDescription !== 'string' || !body.productDescription.trim()) {
+      return NextResponse.json({ error: 'Missing required field: productDescription' }, { status: 400 });
     }
 
-    if (!Array.isArray(body.platforms)) {
-      return NextResponse.json(
-        { error: 'platforms must be an array' },
-        { status: 400 }
-      );
-    }
-
-    if (!Array.isArray(body.features)) {
-      return NextResponse.json(
-        { error: 'features must be an array' },
-        { status: 400 }
-      );
-    }
+    const platforms = Array.isArray(body.platforms) ? body.platforms : [];
+    const features = Array.isArray(body.features) ? body.features : [];
 
     // Save a placeholder document to the database
     const title = `${body.productName} PRD`;
@@ -84,10 +64,13 @@ export async function POST(request: Request) {
     const metadata = JSON.stringify({
       productName: body.productName,
       productDescription: body.productDescription,
-      primaryGoal: body.primaryGoal,
-      targetAudience: body.targetAudience,
-      platforms: body.platforms,
-      features: body.features,
+      primaryGoal: body.primaryGoal || '',
+      targetAudience: body.targetAudience || '',
+      platforms,
+      features,
+      techPreference: body.techPreference,
+      techStack: body.techStack,
+      aiAnswers: body.aiAnswers,
     });
 
     const result = await query<ResultSetHeader>(
@@ -102,11 +85,14 @@ export async function POST(request: Request) {
     const inputs: WizardInputs = {
       productName: body.productName,
       productDescription: body.productDescription,
-      primaryGoal: body.primaryGoal,
-      targetAudience: body.targetAudience,
-      platforms: body.platforms,
-      features: body.features,
+      primaryGoal: body.primaryGoal || '',
+      targetAudience: body.targetAudience || '',
+      platforms,
+      features,
       templateType: body.templateType,
+      techPreference: body.techPreference,
+      techStack: body.techStack,
+      aiAnswers: body.aiAnswers,
     };
 
     const aiStream = await generatePRDStream(inputs);
