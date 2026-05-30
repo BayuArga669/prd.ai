@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AI Integration Layer — Groq API Client
  * Uses native fetch() for zero-dependency Groq LLM calls.
  * Generates structured PRD documents from wizard inputs.
@@ -46,29 +46,178 @@ interface GroqStreamChunk {
  * Build the system prompt for PRD generation
  */
 function buildSystemPrompt(): string {
-  return `You are an expert Product Manager and Technical Writer. Your job is to generate comprehensive, professional Product Requirements Documents (PRDs).
+  return `You are an elite-level Product Manager, Software Architect, and Technical Writer. Your job is to generate extremely detailed, implementation-ready Product Requirements Documents (PRDs) that can be directly handed to an AI coding assistant (like Cursor, Claude Code, Copilot) to build the entire product.
 
-Generate the PRD in clean Markdown format with the following sections:
-1. **Executive Summary** — A concise overview of what this product/feature is and why it matters
-2. **Problem Statement** — The core problem being solved and its impact
-3. **Goals & Success Metrics** — Measurable objectives and KPIs
-4. **Target Audience** — Detailed user personas and segments
-5. **User Stories** — At least 5 user stories in "As a [role], I want [feature] so that [benefit]" format
-6. **Functional Requirements** — Detailed feature specifications with acceptance criteria
-7. **Non-Functional Requirements** — Performance, security, scalability, accessibility requirements
-8. **Technical Approach** — High-level architecture and technology recommendations
-9. **UI/UX Considerations** — Key design principles and interaction patterns
-10. **Risks & Mitigations** — Potential risks and mitigation strategies
-11. **Timeline & Milestones** — Phased rollout plan with estimated timeframes
-12. **Appendix** — Glossary, references, and additional context
+The PRD must be comprehensive enough that an AI can read it and start coding immediately without asking clarifying questions.
 
-Rules:
-- Be specific and actionable, not vague
-- Include realistic metrics and numbers
-- Write in professional but accessible language
-- Use proper Markdown formatting (headers, lists, bold, tables where appropriate)
-- Each section should be substantive (at least 3-5 bullet points or a solid paragraph)
-- Total document should be 1500-3000 words`;
+Generate the PRD in clean Markdown format with ALL of the following sections:
+
+# 1. Executive Summary
+- Product vision in 2-3 paragraphs
+- Core value proposition
+- Key differentiators from competitors
+- Target launch timeline
+
+# 2. Problem Statement
+- Detailed problem description with real-world scenarios
+- Current user pain points (at least 5)
+- Market gap analysis
+- Impact of not solving this problem
+
+# 3. Goals & Success Metrics
+- Primary and secondary goals
+- Detailed KPIs table with: Metric | Target | Measurement Method | Timeframe
+- North Star metric
+- OKRs (Objectives and Key Results)
+
+# 4. Target Audience & User Personas
+- At least 3 detailed user personas with: Name, Age, Role, Pain Points, Goals, Tech Savviness, Usage Frequency
+- User segmentation matrix
+- Primary vs secondary users
+
+# 5. User Stories & Use Cases
+- At least 10 user stories in "As a [role], I want [feature] so that [benefit]" format
+- Group by epic/feature area
+- Include acceptance criteria for each story
+- Priority levels (P0/P1/P2/P3)
+
+# 6. Functional Requirements
+- Detailed feature specifications grouped by module
+- For each feature: Description, User Flow, Input/Output, Edge Cases, Acceptance Criteria
+- Feature dependency map
+- MVP vs Phase 2 vs Phase 3 features
+
+# 7. Information Architecture & Sitemap
+- Complete page/screen hierarchy as a tree structure
+- Navigation flow between pages
+- URL structure (for web apps)
+
+# 8. Wireframe Descriptions
+- For each key screen: detailed layout description
+- Component placement and hierarchy
+- Responsive behavior (mobile/tablet/desktop)
+- Interactive elements and their states
+
+# 9. Database Schema Design
+- Complete entity-relationship diagram description
+- All tables/collections with columns, types, constraints
+- Relationships (1:1, 1:N, N:N) with foreign keys
+- Indexes for performance
+- Use Markdown tables for schema definitions
+- Example:
+  | Column | Type | Constraints | Description |
+  |--------|------|-------------|-------------|
+
+# 10. API Specification
+- RESTful API endpoints grouped by resource
+- For each endpoint: Method, Path, Request Body, Response Body, Status Codes, Auth Required
+- Use code blocks for request/response examples
+- Authentication flow (JWT/OAuth/etc)
+- Rate limiting rules
+- WebSocket events (if applicable)
+
+# 11. Technology Stack (Detailed)
+- For each layer: specific technology, version, and WHY it was chosen
+- Frontend: framework, UI library, state management, form handling, routing
+- Backend: runtime, framework, ORM, validation
+- Database: primary DB, caching layer, search engine
+- Infrastructure: hosting, CI/CD, monitoring, logging
+- Third-party services: auth, payments, email, analytics, storage
+- Development tools: linter, formatter, testing framework
+
+# 12. Project File Structure
+- Complete directory tree with descriptions
+- Example:
+  \`\`\`
+  src/
+  ├── app/              # Next.js App Router pages
+  │   ├── (auth)/       # Auth-related pages
+  │   ├── (dashboard)/  # Dashboard pages
+  │   └── api/          # API routes
+  ├── components/       # Reusable UI components
+  │   ├── ui/           # Base UI primitives
+  │   └── features/     # Feature-specific components
+  ├── lib/              # Utility functions
+  ├── hooks/            # Custom React hooks
+  ├── types/            # TypeScript type definitions
+  └── styles/           # Global styles
+  \`\`\`
+
+# 13. Component Architecture
+- Component tree for key pages
+- Props interface for each major component
+- State management approach (local state, context, store)
+- Data flow diagrams
+
+# 14. Authentication & Authorization
+- Complete auth flow (signup, login, logout, password reset, email verification)
+- Role-based access control (RBAC) matrix
+- Session management strategy
+- Security headers and CSRF protection
+
+# 15. Non-Functional Requirements
+- Performance budgets (LCP, FID, CLS targets)
+- Scalability requirements with specific numbers
+- Security requirements (OWASP Top 10 compliance details)
+- Accessibility (WCAG 2.1 AA specifics)
+- Browser/device support matrix
+- SEO requirements
+- Internationalization (i18n) needs
+
+# 16. Error Handling & Edge Cases
+- Error taxonomy (validation, auth, network, server)
+- User-facing error messages
+- Retry strategies
+- Offline behavior
+- Empty states for all views
+- Loading states specification
+
+# 17. Testing Strategy
+- Unit test coverage targets and key test cases
+- Integration test scenarios
+- E2E test flows
+- Performance test benchmarks
+- Testing tools and frameworks
+
+# 18. Deployment & DevOps
+- Environment setup (dev, staging, production)
+- CI/CD pipeline steps
+- Environment variables list with descriptions
+- Database migration strategy
+- Rollback procedures
+- Monitoring and alerting setup
+
+# 19. Timeline & Milestones
+- Detailed sprint-level breakdown
+- Phase 1 (MVP): specific features and estimated time
+- Phase 2: features and timeline
+- Phase 3: features and timeline
+- Dependencies between phases
+
+# 20. Risks & Mitigations
+- Technical risks with probability and impact matrix
+- Business risks
+- Mitigation strategies for each
+- Contingency plans
+
+# 21. Appendix
+- Glossary of terms
+- References and inspiration links
+- Competitive analysis table
+- Design system tokens (colors, typography, spacing)
+
+CRITICAL RULES:
+- Be EXTREMELY specific and actionable — every section should contain enough detail for an AI to start coding
+- Use real, realistic data in examples (no "lorem ipsum" or "example.com")
+- Include actual code snippets for data models, API types, and component interfaces using TypeScript
+- Use Markdown tables extensively for structured data
+- Use code blocks with proper language tags
+- Every feature must have clear acceptance criteria
+- Database schemas must include all fields with proper types
+- API specs must include request/response body examples as JSON
+- Total document should be 3000-6000 words
+- Write in English for maximum AI coding compatibility
+- Structure the document so each section is self-contained and can be referenced independently`;
 }
 
 /**
@@ -154,7 +303,7 @@ export async function generatePRD(inputs: WizardInputs): Promise<string> {
         model,
         messages,
         temperature: 0.7,
-        max_tokens: 4096,
+        max_tokens: 8192,
         top_p: 0.9,
       }),
     });
@@ -208,7 +357,7 @@ export async function generatePRDStream(inputs: WizardInputs): Promise<ReadableS
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 4096,
+      max_tokens: 8192,
       top_p: 0.9,
       stream: true,
     }),
@@ -438,163 +587,322 @@ function generateFallbackPRD(inputs: WizardInputs): string {
     ? inputs.features.map((f) => `- ${f}`).join('\n')
     : '- Core feature set to be defined';
 
-  return `# ${inputs.productName} — Product Requirements Document
+  const techStackInfo = inputs.techPreference === 'manual' && inputs.techStack && inputs.techStack.length > 0
+    ? inputs.techStack.join(', ')
+    : 'Next.js, TypeScript, Node.js, PostgreSQL, Tailwind CSS';
 
-## Executive Summary
+  let aiCtx = '';
+  if (inputs.aiAnswers && Object.keys(inputs.aiAnswers).length > 0) {
+    const lines = Object.entries(inputs.aiAnswers)
+      .filter(([, v]) => (Array.isArray(v) ? v.length > 0 : typeof v === 'string' && v.trim().length > 0))
+      .map(([k, v]) => `- **${k}:** ${Array.isArray(v) ? v.join(', ') : v}`);
+    if (lines.length > 0) aiCtx = `\n### User-Provided Context\n${lines.join('\n')}\n`;
+  }
 
-${inputs.productName} is a product designed to ${inputs.productDescription || 'solve key challenges for its target users'}. The primary objective is to ${inputs.primaryGoal || 'deliver value to users through innovative features and seamless experience'}.
+  return `# ${inputs.productName} — Implementation-Ready PRD
 
-This PRD outlines the requirements, user stories, technical approach, and timeline for building ${inputs.productName} targeting ${inputs.targetAudience || 'the intended user base'} across ${platforms}.
+## 1. Executive Summary
 
----
+**${inputs.productName}** — ${inputs.productDescription || 'A modern product designed to solve key user challenges.'}
 
-## Problem Statement
+**Primary Goal:** ${inputs.primaryGoal || 'Deliver exceptional user value through innovative features.'}
+**Target Platforms:** ${platforms}
+**Target Users:** ${inputs.targetAudience || 'Professionals and teams'}
+**Target Launch:** 12 weeks from kickoff
 
-Users currently face challenges that ${inputs.productName} aims to address:
-- Lack of streamlined solutions for the identified problem space
-- Existing alternatives are either too complex, too expensive, or too limited
-- The target audience (${inputs.targetAudience || 'users'}) needs a purpose-built solution
-
-**Impact:** Without this product, users will continue to experience friction and inefficiency in their workflows.
-
----
-
-## Goals & Success Metrics
-
-### Primary Goal
-${inputs.primaryGoal || 'Deliver a high-quality product that meets user needs'}
-
-### Key Performance Indicators (KPIs)
-| Metric | Target | Timeframe |
-|--------|--------|-----------|
-| User Adoption Rate | 1,000 active users | 3 months post-launch |
-| User Retention (D30) | > 40% | Ongoing |
-| Task Completion Rate | > 85% | Ongoing |
-| Net Promoter Score (NPS) | > 50 | 6 months post-launch |
-| Average Session Duration | > 5 minutes | Ongoing |
+> This PRD is designed to be **directly usable by AI coding assistants** (Cursor, Claude, Copilot). Every section contains implementation-level detail.
 
 ---
 
-## Target Audience
+## 2. Problem Statement
 
-### Primary Persona
-- **Who:** ${inputs.targetAudience || 'Target users'}
-- **Demographics:** Professionals aged 25-45
-- **Pain Points:** Need for efficient, reliable tools
-- **Goals:** Accomplish tasks faster with less friction
-
-### Secondary Persona
-- **Who:** Team leads and managers overseeing the primary users
-- **Goals:** Visibility, reporting, and team coordination
+- Existing solutions are fragmented, expensive, or overly complex
+- Users waste 2-3 hours/week on manual, repetitive workflows
+- No single tool addresses the full scope of the problem
+- Poor UX in current alternatives leads to low adoption
+- Data lives in silos with no unified view
 
 ---
 
-## User Stories
+## 3. Goals & Success Metrics
 
-1. As a new user, I want to quickly understand the product value so that I can decide to adopt it.
-2. As a returning user, I want my preferences saved so that I can pick up where I left off.
-3. As a power user, I want keyboard shortcuts and bulk actions so that I can work efficiently.
-4. As a team lead, I want to see activity reports so that I can track team productivity.
-5. As an admin, I want to manage user roles and permissions so that I can control access levels.
+| Metric | Target | Method | Timeframe |
+|--------|--------|--------|-----------|
+| MAU | 5,000 | Analytics | 6 months |
+| D30 Retention | >40% | Cohort analysis | Ongoing |
+| Task Completion | >85% | In-app tracking | Ongoing |
+| NPS | >50 | Survey | Quarterly |
+| P95 Page Load | <2s | Lighthouse | Ongoing |
+| P95 API Latency | <500ms | APM | Ongoing |
 
 ---
 
-## Functional Requirements
+## 4. User Personas
 
-### Key Features
+| Attribute | Primary User | Team Lead | Admin |
+|-----------|-------------|-----------|-------|
+| Age | 25-35 | 30-40 | 35-50 |
+| Tech Savvy | High | Medium-High | High |
+| Frequency | Daily | Daily | Weekly |
+| Key Goal | Get work done fast | Track team progress | Manage users & security |
+
+---
+
+## 5. User Stories
+
+| ID | Story | Priority |
+|----|-------|----------|
+| US-01 | As a user, I want to sign up with email so I can create an account | P0 |
+| US-02 | As a user, I want to log in securely | P0 |
+| US-03 | As a user, I want to create/edit/delete items | P0 |
+| US-04 | As a user, I want to search and filter my items | P0 |
+| US-05 | As a user, I want to organize items into categories | P1 |
+| US-06 | As a user, I want to export as PDF | P1 |
+| US-07 | As a user, I want to share items with teammates | P1 |
+| US-08 | As a lead, I want a dashboard showing team activity | P2 |
+| US-09 | As a user, I want dark mode | P2 |
+| US-10 | As an admin, I want to manage user roles | P2 |
+
+---
+
+## 6. Functional Requirements
+
+### Core Features
 ${features}
 
-### Detailed Requirements
-1. **User Authentication** — Secure login/signup with email and social providers
-2. **Core Workflow** — Primary value-delivery features aligned with the product goal
-3. **Data Management** — CRUD operations for user-generated content
-4. **Collaboration** — Sharing, commenting, and team features
-5. **Export & Integration** — Data export (PDF, CSV) and third-party integrations
+### MVP vs Later
+| Feature | MVP | Phase 2 | Phase 3 |
+|---------|:---:|:---:|:---:|
+| Auth | ✅ | | |
+| CRUD | ✅ | | |
+| Search | ✅ | | |
+| Dashboard | ✅ | | |
+| Export PDF | | ✅ | |
+| Collaboration | | ✅ | |
+| Analytics | | | ✅ |
 
 ---
 
-## Non-Functional Requirements
+## 7. Sitemap
 
-- **Performance:** Page load < 2s, API response < 500ms
-- **Scalability:** Support 10,000 concurrent users
-- **Security:** OWASP Top 10 compliance, data encryption at rest and in transit
-- **Accessibility:** WCAG 2.1 AA compliance
-- **Availability:** 99.9% uptime SLA
-- **Platforms:** ${platforms}
-
----
-
-## Technical Approach
-
-### Architecture
-- **Frontend:** React/Next.js with server-side rendering
-- **Backend:** Node.js API with RESTful endpoints
-- **Database:** MySQL/TiDB for relational data
-- **AI/ML:** LLM integration for intelligent features
-- **Infrastructure:** Cloud-hosted with CDN for static assets
-
-### Technology Stack
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js, React, TypeScript |
-| Styling | Tailwind CSS |
-| Backend | Next.js API Routes |
-| Database | MySQL (TiDB Cloud) |
-| AI | Groq API (LLaMA 3) |
-| Deployment | Vercel / AWS |
+\`\`\`
+/                    # Landing
+/login               # Login
+/register            # Register
+/dashboard           # Dashboard
+/items               # Items list
+/items/new           # Create item
+/items/:id           # Item detail
+/settings            # Settings
+/settings/profile    # Profile
+\`\`\`
 
 ---
 
-## UI/UX Considerations
+## 9. Database Schema
 
-- Clean, modern interface with consistent design language
-- Mobile-first responsive design for ${platforms}
-- Progressive disclosure — show complexity only when needed
-- Meaningful loading states and error handling
-- Accessibility-first approach with proper ARIA labels
+### users
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | BIGINT | PK, AUTO_INCREMENT |
+| email | VARCHAR(255) | UNIQUE, NOT NULL |
+| password_hash | VARCHAR(255) | NOT NULL |
+| name | VARCHAR(100) | NOT NULL |
+| avatar_url | VARCHAR(500) | NULLABLE |
+| role | ENUM('user','admin') | DEFAULT 'user' |
+| created_at | TIMESTAMP | DEFAULT NOW() |
 
----
-
-## Risks & Mitigations
-
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Scope creep | High | High | Strict MVP definition, phased releases |
-| Technical debt | Medium | Medium | Code reviews, refactoring sprints |
-| Low adoption | High | Medium | Beta testing, user feedback loops |
-| API rate limits | Medium | Low | Caching, fallback mechanisms |
-| Data security breach | Critical | Low | Security audits, encryption, RBAC |
-
----
-
-## Timeline & Milestones
-
-| Phase | Duration | Deliverables |
-|-------|----------|-------------|
-| Phase 1: Foundation | Weeks 1-2 | Core architecture, auth, database |
-| Phase 2: MVP Features | Weeks 3-6 | Primary features, basic UI |
-| Phase 3: Polish | Weeks 7-8 | UI refinement, testing, bug fixes |
-| Phase 4: Beta Launch | Week 9 | Limited release, feedback collection |
-| Phase 5: GA Launch | Week 12 | Full public release |
+### items
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | BIGINT | PK, AUTO_INCREMENT |
+| title | VARCHAR(255) | NOT NULL |
+| content | TEXT | NULLABLE |
+| status | ENUM('draft','active','archived') | DEFAULT 'draft' |
+| user_id | BIGINT | FK → users.id |
+| metadata | JSON | NULLABLE |
+| created_at | TIMESTAMP | DEFAULT NOW() |
+| updated_at | TIMESTAMP | ON UPDATE NOW() |
 
 ---
 
-## Appendix
+## 10. API Specification
 
-### Glossary
-- **PRD:** Product Requirements Document
-- **MVP:** Minimum Viable Product
-- **KPI:** Key Performance Indicator
-- **NPS:** Net Promoter Score
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | /api/auth/register | No | Register |
+| POST | /api/auth/login | No | Login → JWT |
+| GET | /api/auth/me | Yes | Current user |
+| GET | /api/items | Yes | List items |
+| POST | /api/items | Yes | Create item |
+| GET | /api/items/:id | Yes | Get item |
+| PUT | /api/items/:id | Yes | Update item |
+| DELETE | /api/items/:id | Yes | Delete item |
 
-### References
-- Product vision document
-- Competitive analysis report
-- User research findings
+\`\`\`json
+// POST /api/items — Request
+{ "title": "New Item", "content": "Details...", "status": "draft" }
+
+// Response 201
+{ "id": 42, "title": "New Item", "status": "draft", "created_at": "2024-01-15T10:30:00Z" }
+\`\`\`
 
 ---
 
-*This PRD was generated by PRD.ai — AI-Powered Product Documentation*
-*Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*
+## 11. Technology Stack
+
+**Chosen:** ${techStackInfo}
+
+| Layer | Tech | Why |
+|-------|------|-----|
+| Frontend | Next.js (App Router) | SSR, file routing, RSC |
+| Language | TypeScript | Type safety |
+| Styling | Tailwind CSS | Utility-first, fast |
+| Database | PostgreSQL | ACID, JSON, scalable |
+| ORM | Prisma | Type-safe, migrations |
+| Auth | JWT + bcrypt | Stateless, secure |
+| Deploy | Vercel | Zero-config, edge CDN |
+
+---
+
+## 12. File Structure
+
+\`\`\`
+src/
+├── app/
+│   ├── (auth)/login/page.tsx
+│   ├── (auth)/register/page.tsx
+│   ├── (dashboard)/dashboard/page.tsx
+│   ├── (dashboard)/items/page.tsx
+│   ├── (dashboard)/items/[id]/page.tsx
+│   ├── (dashboard)/settings/page.tsx
+│   ├── api/auth/[...route]/route.ts
+│   ├── api/items/route.ts
+│   ├── api/items/[id]/route.ts
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/ui/       # Button, Input, Card, Modal
+├── components/features/ # ItemCard, Dashboard, Sidebar
+├── lib/                 # db.ts, auth.ts, utils.ts
+├── hooks/               # useAuth, useItems
+├── types/               # index.ts
+└── styles/globals.css
+\`\`\`
+
+---
+
+## 13. Component Interfaces
+
+\`\`\`typescript
+interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+interface ItemCardProps {
+  item: { id: number; title: string; status: string; created_at: string };
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
+}
+\`\`\`
+
+---
+
+## 14. Auth Flow
+
+1. Register → bcrypt hash (12 rounds) → store in DB → return JWT
+2. Login → verify password → issue JWT (24h, httpOnly cookie)
+3. Middleware checks JWT on protected routes
+4. Refresh token if <6h remaining
+
+---
+
+## 15. Non-Functional Requirements
+
+- LCP <2.5s, FID <100ms, CLS <0.1
+- 10,000 concurrent users
+- OWASP Top 10, HTTPS, CSRF, rate limiting
+- WCAG 2.1 AA, keyboard nav, screen readers
+- Chrome 90+, Firefox 90+, Safari 15+, Edge 90+
+
+---
+
+## 16. Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Offline | Cached data + banner |
+| 401 | Redirect to /login |
+| 404 | Not Found page |
+| 500 | Error toast + retry |
+| Empty state | Illustration + CTA |
+
+---
+
+## 17. Testing
+
+| Type | Target | Tools |
+|------|--------|-------|
+| Unit | >80% | Jest + RTL |
+| E2E | Critical paths | Playwright |
+| Performance | Core Web Vitals | Lighthouse CI |
+
+---
+
+## 18. Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| DATABASE_URL | DB connection string | Yes |
+| JWT_SECRET | Signing secret (32+ chars) | Yes |
+| NEXT_PUBLIC_APP_URL | Public URL | Yes |
+
+---
+
+## 19. Timeline
+
+| Phase | Weeks | Deliverables |
+|-------|-------|-------------|
+| Foundation | 1-2 | Setup, auth, DB, basic UI |
+| Core MVP | 3-6 | CRUD, dashboard, search |
+| Polish | 7-8 | Error handling, perf, responsive |
+| Beta | 9-10 | User testing, bug fixes |
+| Launch | 11-12 | Production deploy, monitoring |
+
+---
+
+## 20. Risks
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Scope creep | High | Strict MVP, phased releases |
+| Performance | Medium | Budgets, lazy loading, caching |
+| Security | Critical | Audits, dependency scanning |
+| Low adoption | High | Beta testing, feedback loops |
+
+---
+
+## 21. Appendix
+${aiCtx}
+### Design Tokens
+\`\`\`css
+:root {
+  --primary: #6366f1;
+  --secondary: #8b5cf6;
+  --success: #22c55e;
+  --error: #ef4444;
+  --bg: #ffffff;
+  --text: #0f172a;
+  --font: 'Inter', system-ui, sans-serif;
+}
+\`\`\`
+
+---
+
+*Generated by PRD.ai — Implementation-ready for AI coding assistants*
+*${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*
 `;
 }
