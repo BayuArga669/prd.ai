@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+/npm-debug.log
+
+# Next.js build output and cache
+.next
+out
+build
+
+# Local environment variables
+.env
+.env*.local
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Documentation and project notes
+README.md
+plan
+scratch
+.agents
+.gemini
+
+# Docker config
+Dockerfile
+.dockerignore
