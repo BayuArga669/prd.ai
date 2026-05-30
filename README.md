@@ -109,5 +109,14 @@ npm run build
 
 ---
 
+## ☁️ Deployment (Google Cloud Run & CI/CD)
+This repository is configured for automated deployments to **Google Cloud Run** using **GitHub Actions**.
+
+### Build & Deploy Flow:
+- When a push is made to the `main` branch, the GitHub Actions runner builds a container using the optimized Next.js `standalone` mode (`Dockerfile`).
+- The image is pushed to **Google Artifact Registry** and deployed to **Cloud Run** in the `asia-southeast1` region.
+
+---
+
 ## 📄 License
 This project is licensed under the MIT License.
