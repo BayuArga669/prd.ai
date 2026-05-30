@@ -215,15 +215,7 @@ function LoginForm() {
           </button>
         </form>
 
-        {/* Demo Credentials Info (Login page only) */}
-        {isLogin && (
-          <div className="mt-8 pt-6 border-t border-on-surface/10 text-center font-bold">
-            <span className="text-xs text-on-surface-variant block mb-1 uppercase tracking-wider">Demo Access Credentials</span>
-            <code className="text-xs bg-surface-container-high px-3 py-1.5 rounded-lg border border-on-surface/15 text-primary">
-              alex@prd.ai / password123
-            </code>
-          </div>
-        )}
+
       </div>
     </div>
   );
