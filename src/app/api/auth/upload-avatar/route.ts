@@ -56,23 +56,9 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique name
-    const originalExt = path.extname(file.name) || '.png';
-    const uniqueFilename = `${crypto.randomUUID()}${originalExt}`;
-
-    // Define upload directories
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
-
-    // Ensure upload directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // Save file to disk
-    const filePath = path.join(uploadDir, uniqueFilename);
-    await fs.promises.writeFile(filePath, new Uint8Array(buffer));
-
-    const fileUrl = `/uploads/avatars/${uniqueFilename}`;
+    // Convert to Base64 Data URL
+    const base64Data = buffer.toString('base64');
+    const fileUrl = `data:${file.type};base64,${base64Data}`;
 
     return NextResponse.json({
       message: 'File uploaded successfully',

@@ -61,7 +61,7 @@ export async function initDatabase() {
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         name VARCHAR(255) NULL,
-        avatar_url VARCHAR(1024) NULL,
+        avatar_url LONGTEXT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
@@ -83,10 +83,11 @@ export async function initDatabase() {
       )
     `);
 
-    // 2b. Migrate existing documents table — add columns if missing
+    // 2b. Migrate existing tables — add columns or modify types if missing
     const alterQueries = [
       "ALTER TABLE documents ADD COLUMN template_type VARCHAR(100) NULL",
       "ALTER TABLE documents ADD COLUMN metadata JSON NULL",
+      "ALTER TABLE users MODIFY COLUMN avatar_url LONGTEXT NULL",
     ];
     for (const q of alterQueries) {
       try {
