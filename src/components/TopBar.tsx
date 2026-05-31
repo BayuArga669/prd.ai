@@ -75,6 +75,7 @@ export default function TopBar({ initialAvatarUrl }: TopBarProps) {
               height={32} 
               className="object-cover w-full h-full" 
               src={avatarUrl || defaultAvatar} 
+              unoptimized
             />
           </div>
         </div>
@@ -96,6 +97,7 @@ export default function TopBar({ initialAvatarUrl }: TopBarProps) {
             height={40} 
             className="object-cover w-full h-full" 
             src={avatarUrl || defaultAvatar} 
+            unoptimized
           />
         </div>
       </div>
